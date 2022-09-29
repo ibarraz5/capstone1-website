@@ -1,0 +1,190 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!-- Example of the xml file we will be working with -->
+<schema xmlns = "http://www.w3.org/2001/XMLSchema"
+targetNamespace = "cmac:2.0"
+	xmlns:cmac = "cmac:2.0"
+	xmlns:xs = "http://www.w3.org/2001/XMLSchema"
+elementFormDefault = "qualified"
+attributeFormDefault = "unqualified">
+	<element name = "CMAC_Alert_Attributes">
+		<annotation>
+			<documentation>CMAC Alert Message (version 2.0)</documentation>
+		</annotation>
+		<complexType>
+			<sequence>
+				<element name = "CMAC_protocol_version" type = "string"/>
+				<element name = "CMAC_sending_gateway_id" type = "anyURI"/>
+				<element name = "CMAC_message_number">
+					<simpleType>
+						<restriction base = "hexBinary">
+							<length value = "4" fixed = "true"/>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name = "CMAC_referenced_message_number" minOccurs="0">
+					<simpleType>
+						<restriction base = "hexBinary">
+							<length value = "4" fixed = "true"/>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name = "CMAC_referenced_message_cap_identifier" type = "string"
+minOccurs = "0"/>
+				<element name = "CMAC_special_handling" minOccurs = "0">
+					<simpleType>
+						<restriction base = "string">
+							<enumeration value = "Presidential"/>
+							<enumeration value = "Child Abduction"/>
+							<enumeration value = "Required Monthly Test"/>
+							<enumeration value = "Public Safety"/>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name = "CMAC_sender" type = "string" minOccurs = "0"/>
+<!-- 13 Available at: < http://www.nws.noaa.gov/directives/sym/pd01017012curr.pdf >.
+ -->
+				<element name = "CMAC_sent_date_time" type = "dateTime"/>
+				<element name = "CMAC_status">
+					<simpleType>
+						<restriction base = "string">
+							<enumeration value = "Actual"/>
+							<enumeration value = "System"/>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name = "CMAC_message_type">
+					<simpleType>
+						<restriction base = "string">
+							<enumeration value = "Alert"/>
+							<enumeration value = "Update"/>
+							<enumeration value = "Cancel"/>
+							<enumeration value = "Ack"/>
+							<enumeration value = "Error"/>
+							<enumeration value = "RMT"/>
+							<enumeration value = "Link Test"/>
+							<enumeration value = "Transmission Control - Cease"/>
+							<enumeration value = "Transmission Control - Resume"/>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name = "CMAC_response_code" type = "string" minOccurs = "0"
+maxOccurs = "unbounded"/>
+				<element name = "CMAC_note" type = "string" minOccurs = "0"
+maxOccurs = "unbounded"/>
+				<element name = "CMAC_cap_alert_uri" type = "anyURI" minOccurs = "0"/>
+				<element name = "CMAC_cap_identifier" type = "string" minOccurs = "0"/>
+				<element name = "CMAC_cap_sent_date_time" type = "dateTime" minOccurs = "0"/>
+				<element name = "CMAC_alert_info" minOccurs = "0">
+					<complexType>
+						<sequence>
+							<element name = "CMAC_category">
+								<simpleType>
+									<restriction base = "string">
+										<enumeration value = "Geo"/>
+										<enumeration value = "Met"/>
+										<enumeration value = "Safety"/>
+										<enumeration value = "Security"/>
+										<enumeration value = "Rescue"/>
+										<enumeration value = "Fire"/>
+										<enumeration value = "Health"/>
+										<enumeration value = "Env"/>
+										<enumeration value = "Transport"/>
+										<enumeration value = "Infra"/>
+										<enumeration value = "CBRNE"/>
+										<enumeration value = "Other"/>
+									</restriction>
+								</simpleType>
+							</element>
+							<element name = "CMAC_response_type" minOccurs = "0">
+								<simpleType>
+									<restriction base = "string">
+										<enumeration value = "Shelter"/>
+										<enumeration value = "Evacuate"/>
+										<enumeration value = "Prepare"/>
+										<enumeration value = "Execute"/>
+										<enumeration value = "Monitor"/>
+										<enumeration value = "Avoid"/>
+										<enumeration value = "Assess"/>
+										<enumeration value = "None"/>
+									</restriction>
+								</simpleType>
+							</element>
+							<element name = "CMAC_severity">
+								<simpleType>
+									<restriction base = "string">
+										<enumeration value = "Extreme"/>
+										<enumeration value = "Severe"/>
+									</restriction>
+								</simpleType>
+							</element>
+							<element name = "CMAC_urgency">
+								<simpleType>
+									<restriction base = "string">
+										<enumeration value = "Immediate"/>
+										<enumeration value = "Expected"/>
+									</restriction>
+								</simpleType>
+							</element>
+							<element name = "CMAC_certainty">
+								<simpleType>
+									<restriction base = "string">
+										<enumeration value = "Observed"/>
+										<enumeration value = "Likely"/>
+									</restriction>
+								</simpleType>
+							</element>
+							<element name = "CMAC_expires_date_time" type = "dateTime"/>
+							<element name = "CMAC_sender_name" type = "string" minOccurs = "0"/>
+							<element name = "CMAC_Alert_Area" minOccurs = "0" maxOccurs = "unbounded">
+								<complexType>
+									<sequence>
+										<element name = "CMAC_area_description" type = "string"/>
+										<element name = "CMAC_polygon" type = "string" minOccurs = "0" maxOccurs = "unbounded"/>
+										<element name = "CMAC_circle" type = "string" minOccurs = "0" maxOccurs = "unbounded"/>
+										<element name = "CMAC_cmas_geocode" type= "string" maxOccurs = "unbounded"/>
+										<element name = "CMAC_cap_geocode" minOccurs= "0" maxOccurs= "unbounded">
+											<complexType>
+												<sequence>
+													<element ref = "cmac:valueName"/>
+													<element ref = "cmac:value"/>
+												</sequence>
+											</complexType>
+										</element>
+										<element name = "CMAC_gnis" type = "string" minOccurs = "0" maxOccurs = "unbounded"/>
+									</sequence>
+								</complexType>
+							</element>
+							<element name = "CMAC_Alert_Text" maxOccurs = "unbounded">
+								<complexType>
+									<sequence>
+										<element name = "CMAC_text_language">
+											<simpleType>
+												<restriction base = "string">
+													<enumeration value = "English"/>
+													<enumeration value = "Spanish"/>
+												</restriction>
+											</simpleType>
+										</element>
+										<element name = "CMAC_short_text_alert_message_length" type = "integer"/>
+										<element name = "CMAC_short_text_alert_message" type = "string"/>
+										<element name = "CMAC_long_text_alert_message_length" type = "integer"/>
+										<element name = "CMAC_long_text_alert_message" type = "string"/>
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+				<element name="CMAC_Digital_Signature" minOccurs = "0">
+					<complexType>
+						<sequence>
+							<any namespace="http://www.w3.org/2000/09/xmldsig#" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+						</sequence>
+					</complexType>
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+	<element name = "valueName" type = "string"/>
+	<element name = "value" type = "string"/>
+</schema>
