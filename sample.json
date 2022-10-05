@@ -1,0 +1,35 @@
+{
+	"users": [{
+			"username": "user1",
+			"received": "yes",
+            "latency": "2 seconds"
+		},
+		{
+			"username": "user2",
+			"received": "no",
+            "latency": "10 seconds"
+
+		},
+		{
+			"username": "user3",
+			"received": "yes",
+            "latency": "5 seconds"
+		},
+        {
+			"username": "user4",
+			"received": "yes",
+            "latency": "2 seconds"
+		},
+		{
+			"username": "user5",
+			"received": "no",
+            "latency": "10 seconds"
+
+		},
+		{
+			"username": "user6",
+			"received": "yes",
+            "latency": "5 seconds"
+		}
+	]
+}

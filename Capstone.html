@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head> 
+    <title>Capstone 1</title> 
+<style>
+
+html, body {
+   height: 100%
+}
+table, th, td{
+    border: 1px solid black;
+}
+#mainhead{
+    background-color: yellow;
+}
+
+</style>
+
+</head>
+<body >
+<div class="app">
+   
+    <!-- Top section -->
+    <header class="top-header">
+        <img src="att.jpg" width="150" height="150">
+        <img src="ASU-logo.png" width="250" height="150">
+        <h1 id="mainhead">WEA Capstone 1</h1>
+    </header>
+    <h3>Team members: Aaron Cordeau, Alex Klein, Derek Argall, Ivan Barraza Duran, Jeffrey Ayres </h3>
+    <button type="button" onclick="fetchJSON()">Display Data</button>
+    <ul></ul>
+    <table></table>
+
+ </div>
+
+ <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+ <script type="text/javascript">
+
+
+    function fetchJSON(){
+        $(function(){
+            $.getJSON('sample.json', function(data){
+                console.log('data imported')
+                $.each(data.users,function(i,usr){
+                    $('ul').append('<li>'+'Username: '+usr.username+' Did user receive the alert? '+usr.received+'</li>')
+                })
+            }).error(function(){
+                console.log('error importing data')
+            })
+        })
+        $(function(){
+            $.getJSON('sample.json', function(data){
+                console.log('data imported')
+                $('table').append('<tr>'+'<th>'+' Username '+'</th>'+'<th>'+' Received Alert '+'</th>'+
+                        '<th>'+'Latency'+'</th>'+'</tr>')
+                $.each(data.users,function(i,usr){
+                    $('table').append(
+                        '<tr>'+'<th>'+usr.username+'</th>'+'<th>'+usr.received+'</th>'+
+                        '<th>'+usr.latency+'</th>'+'</tr>')
+                })
+            }).error(function(){
+                console.log('error importing data')
+            })
+        })
+    } 
+
+   
+   //Standardize an answer string so we can compare and accept variations
+   function cleanseAnswer(input="") {
+      var friendlyAnswer = input.toLowerCase()
+      friendlyAnswer = friendlyAnswer.replace("<i>", "")
+      friendlyAnswer = friendlyAnswer.replace("</i>", "")
+      friendlyAnswer = friendlyAnswer.replace(/ /g, "")
+      friendlyAnswer = friendlyAnswer.replace(/"/g, "")
+      friendlyAnswer = friendlyAnswer.replace(/^a /, "")
+      friendlyAnswer = friendlyAnswer.replace(/^an /, "")      
+      return friendlyAnswer.trim()
+   }
+
+function shuffle(a) {
+    var j, x, i
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1))
+        x = a[i]
+        a[i] = a[j]
+        a[j] = x
+    }
+    return a
+} 
+
+//-------------------------------------------
+
+
+</script>  
+</body>
+</html>
+
+
