@@ -65,7 +65,7 @@ public class WEAController {
     @PutMapping(value = "/upload")
     public ResponseEntity<String> upload(@RequestBody UploadWrapper wrapper) {
         URI location = ServletUriComponentsBuilder
-                .fromHttpUrl("https://localhost:8080/wea/getUpload?identifier=" + wrapper.getId())
+                .fromHttpUrl("http://localhost:8080/wea/getUpload?identifier=" + wrapper.getId())
                 .buildAndExpand()
                 . toUri();
 
@@ -91,7 +91,7 @@ public class WEAController {
         if (wrapper == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Upload not found");
         }
-        
+
         return ResponseEntity.ok(wrapper);
     }
 }
