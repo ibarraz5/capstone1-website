@@ -4,11 +4,15 @@ import com.capstone.wea.model.WEAMessageModel;
 import com.ctc.wstx.shaded.msv.org_jp_gr_xml.dom.XMLMaker;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 @RequestMapping("/wea")
 @RestController
@@ -19,7 +23,7 @@ public class WEAController {
      * go this route for message retrivial it will be
      * randomized in the future
      *
-     * @return An XML formatted WEA message
+     * @return HTTP 200 OK and an XML formatted WEA message
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<WEAMessageModel> getMessage() {
@@ -40,9 +44,23 @@ public class WEAController {
         return ResponseEntity.ok(model);
     }
 
+    /**
+     * Endpoint to which the data collected from the
+     * mobile device will be sent
+     *
+     * @param message The xml payload
+     * @return HTTP 200 OK and the URI of the
+     *         uploaded data
+     */
     @PutMapping(value = "/upload")
     public ResponseEntity<String> upload(@RequestBody WEAMessageModel message) {
-        return ResponseEntity.created(null).build();
+        URI location = ServletUriComponentsBuilder
+                .fromHttpUrl("http:/localhost:8080/wea/getUpload?number=" + message.getMessageNumber() +
+                        "&identifier=" + message.getCapIdentifier())
+                .buildAndExpand()
+                . toUri();
+
+        return ResponseEntity.created(location).build();
     }
 
     @GetMapping("/getUpload")
