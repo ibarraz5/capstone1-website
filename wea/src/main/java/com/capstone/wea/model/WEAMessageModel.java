@@ -2,11 +2,18 @@ package com.capstone.wea.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
 public class WEAMessageModel {
+    @JacksonXmlProperty(isAttribute = true)
+    private String xmlns;
+    @JsonProperty("CMAC_protocol_version")
+    private String protocolVersion;
+    @JsonProperty("CMAC_sending_gateway_id")
+    private String sendingGatewayId;
     @JsonProperty("CMAC_message_number")
     private String messageNumber;
 
@@ -16,11 +23,20 @@ public class WEAMessageModel {
     @JsonProperty("CMAC_sent_date_time")
     private String sentDateTime;
 
+    @JsonProperty("CMAC_status")
+    private String status;
+
     @JsonProperty("CMAC_message_type")
     private String messageType;
 
+    @JsonProperty("CMAC_cap_alert_uri")
+    private String alertUri;
+
     @JsonProperty("CMAC_cap_identifier")
     private String capIdentifier;
+
+    @JsonProperty("CMAC_cap_sent_date_time")
+    private String capSentDateTime;
 
     @JsonProperty("CMAC_alert_info")
     private WEAMessageAlertInfo alertInfo;

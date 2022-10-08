@@ -3,6 +3,7 @@ package com.capstone.wea.controller;
 import com.capstone.wea.model.WEAMessageModel;
 import com.ctc.wstx.shaded.msv.org_jp_gr_xml.dom.XMLMaker;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,14 +23,13 @@ public class WEAController {
      *
      * @return An XML formatted WEA message
      */
-    @GetMapping("/getMessage")
+    @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<WEAMessageModel> getMessage() throws IOException {
         XmlMapper mapper = null;
         File message = null;
         try {
             message = new File("src/main/resources/sampleMessage.xml");
             mapper = new XmlMapper();
-            mapper.readValue(message, WEAMessageModel.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
