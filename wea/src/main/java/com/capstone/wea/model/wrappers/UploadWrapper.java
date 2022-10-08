@@ -18,4 +18,16 @@ public class UploadWrapper {
     public UploadWrapper() {
         id = next_id++;
     }
+
+    public CollectedUserData getUserData() {
+        return userData;
+    }
+
+    public WEAMessageModel getMessage() {
+        return message;
+    }
+
+    public int getId() {
+        return id;
+    }
 }
