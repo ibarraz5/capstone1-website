@@ -39,8 +39,4 @@ public class WEAMessageAlertInfo {
     public String getSenderName() {
         return senderName;
     }
-
-    public List<WEAMessageAlertArea> getAlertArea() {
-        return alertAreaList;
-    }
 }

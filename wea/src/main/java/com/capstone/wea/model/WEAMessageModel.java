@@ -1,7 +1,9 @@
 package com.capstone.wea.model;
 
+import com.fasterxml.jackson.annotation.JacksonAnnotation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlCData;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -9,7 +11,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
 public class WEAMessageModel {
     @JacksonXmlProperty(isAttribute = true)
-    private String xmlns;
+    private String xmlns = "cmac:2.0";
     @JsonProperty("CMAC_protocol_version")
     private String protocolVersion;
     @JsonProperty("CMAC_sending_gateway_id")

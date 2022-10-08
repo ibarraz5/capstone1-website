@@ -22,17 +22,22 @@ public class WEAController {
      * @return An XML formatted WEA message
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
-    public ResponseEntity<WEAMessageModel> getMessage() throws IOException {
+    public ResponseEntity<WEAMessageModel> getMessage() {
         XmlMapper mapper = null;
         File message = null;
+        WEAMessageModel model = null;
+
         try {
             message = new File("src/main/resources/sampleMessage.xml");
             mapper = new XmlMapper();
+            mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
+            model = mapper.readValue(message, WEAMessageModel.class);
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
 
-        return ResponseEntity.ok(mapper.readValue(message, WEAMessageModel.class));
+        return ResponseEntity.ok(model);
     }
 
     @PutMapping(value = "/upload")
