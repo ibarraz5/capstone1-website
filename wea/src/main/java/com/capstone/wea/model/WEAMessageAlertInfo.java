@@ -28,6 +28,10 @@ public class WEAMessageAlertInfo {
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<WEAMessageAlertArea> alertAreaList;
 
+    @JsonProperty("CMAC_Alert_Text")
+    @JacksonXmlElementWrapper(useWrapping = false)
+    private List<WEAMessageAlertText> alertTextList;
+
     public String getExpires() {
         return expires;
     }

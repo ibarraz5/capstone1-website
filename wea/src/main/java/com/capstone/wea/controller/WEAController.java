@@ -23,7 +23,16 @@ public class WEAController {
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<WEAMessageModel> getMessage() throws IOException {
-        return ResponseEntity.ok(null);
+        XmlMapper mapper = null;
+        File message = null;
+        try {
+            message = new File("src/main/resources/sampleMessage.xml");
+            mapper = new XmlMapper();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok(mapper.readValue(message, WEAMessageModel.class));
     }
 
     @PutMapping(value = "/upload")
