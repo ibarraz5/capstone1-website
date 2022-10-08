@@ -10,6 +10,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_alert_info")
 public class WEAMessageAlertInfo {
+    @JsonProperty("CMAC_category")
+    private String category;
+    @JsonProperty("CMAC_severity")
+    private String severity;
+    @JsonProperty("CMAC_urgency")
+    private String urgency;
+    @JsonProperty("CMAC_certainty")
+    private String certainty;
     @JsonProperty("CMAC_expires_date_time")
     private String expires;
 
