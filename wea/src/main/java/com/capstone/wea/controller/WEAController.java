@@ -5,9 +5,7 @@ import com.ctc.wstx.shaded.msv.org_jp_gr_xml.dom.XMLMaker;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,15 +23,16 @@ public class WEAController {
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<WEAMessageModel> getMessage() throws IOException {
-        XmlMapper mapper = null;
-        File message = null;
-        try {
-            message = new File("src/main/resources/sampleMessage.xml");
-            mapper = new XmlMapper();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return ResponseEntity.ok(null);
+    }
 
-        return ResponseEntity.ok(mapper.readValue(message, WEAMessageModel.class));
+    @PutMapping(value = "/upload")
+    public ResponseEntity<String> upload(@RequestBody WEAMessageModel message) {
+        return ResponseEntity.created(null).build();
+    }
+
+    @GetMapping("/getUpload")
+    public ResponseEntity<String> getUpload(@RequestParam String messageNumber, @RequestParam String capIdentifier) {
+        return ResponseEntity.ok("ok");
     }
 }
