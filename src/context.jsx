@@ -5,6 +5,25 @@ const allMealsUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s=";
 
 const randomMealUrl = "https://www.themealdb.com/api/json/v1/1/random.php";
 
+const someData = [
+  {
+    fname: "John",
+    lname: "Farver",
+    fullname: "John Farver",
+    location: "Tempe, Az",
+    id: "aby43",
+    occupation: "Software Developer",
+  },
+  {
+    fname: "Bill",
+    lname: "Geldon",
+    fullname: "Bill Geldon",
+    location: "Pheonix, Az",
+    id: "bby54",
+    occupation: "Administration Specialist",
+  },
+];
+
 const AppContext = React.createContext();
 
 const getFavoritesFromLocalStorage = () => {
@@ -24,6 +43,7 @@ const AppProvider = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [favorites, setFavorites] = useState(getFavoritesFromLocalStorage());
+  const [sampleData, setSampleData] = useState([]);
 
   const selectMeal = (idMeal, favoriteMeal) => {
     let meal;
@@ -61,6 +81,10 @@ const AppProvider = ({ children }) => {
     localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
   };
 
+  const getData = async (data) => {
+    await setSampleData(data);
+  };
+
   const fetchMeals = async (url) => {
     setLoading(true);
     try {
@@ -85,6 +109,10 @@ const AppProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    getData(someData);
+  });
+
+  useEffect(() => {
     if (!searchTerm) return;
     fetchMeals(`${allMealsUrl}${searchTerm}`);
   }, [searchTerm]);
@@ -104,6 +132,7 @@ const AppProvider = ({ children }) => {
         favorites,
         addToFavorites,
         removeFromFavorites,
+        sampleData,
       }}
     >
       {children}
