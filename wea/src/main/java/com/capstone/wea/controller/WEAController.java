@@ -1,23 +1,19 @@
 package com.capstone.wea.controller;
 
-import com.capstone.wea.model.cmac.CollectedUserData;
-import com.capstone.wea.model.cmac.WEAMessageModel;
-import com.capstone.wea.model.queryresults.MessageListResult;
+import com.capstone.wea.model.cmac.*;
+import com.capstone.wea.model.queryresults.*;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -118,10 +114,36 @@ public class WEAController {
      *         CMAC_sent_date_time
      */
     @GetMapping("/getMessageList")
-    public ResponseEntity<List<MessageListResult>> getMessages(@RequestParam String sender) {
+    public ResponseEntity<List<MessageListResult>> getMessageList(@RequestParam String sender) {
         List<MessageListResult> result = dbTemplate.query("select cmac_message_number, cmac_sent_date_time from " +
                 "cmac_message where cmac_sender = \"" + sender + "\";",
                 new MessageListResult.MessageListResultMapper());
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Gets the stats for a specified CMAC_Alert.
+     * The stats include: (1) the average time
+     * between when the message was sent and the
+     * devices received it, (2) the shortest time
+     * from all devices in (1), (3) the longest
+     * time from all devices in (1), (4) the
+     * average delay between when the devices
+     * received the message and when it was
+     * displayed on the device, (5) the number
+     * of devices that received the message, and
+     * (6) the number of devices that received the
+     * message that were outside the targeted area
+     * @param messageNumber The cmac_message_number
+     *                      for which to get the
+     *                      stats
+     * @return HTTP 200 OK and a JSON object
+     *         containing the stats
+     */
+    @GetMapping("/getMessageStats")
+    public ResponseEntity<MessageStatsResult> getMessageStats(@RequestParam String messageNumber) {
+        MessageStatsResult result = new MessageStatsResult();
 
         return ResponseEntity.ok(result);
     }
