@@ -4,20 +4,28 @@ import com.capstone.wea.model.CollectedUserData;
 import com.capstone.wea.model.WEAMessageModel;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import com.mysql.cj.jdbc.JdbcConnection;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.JDBCType;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 @RequestMapping("/wea")
 @RestController
 public class WEAController {
     private HashMap<Integer, CollectedUserData> uploads;
+    @Autowired
+    JdbcTemplate dbTemplate;
 
     public WEAController() {
         uploads = new HashMap<>();
@@ -92,5 +100,21 @@ public class WEAController {
         }
 
         return ResponseEntity.ok(data);
+    }
+
+    /**
+     * Gets a list of all cmac_message_numbers from the
+     * given sender in the database.
+     *
+     * @param sender A cmac_sender. '@' characters
+     *               must be encoded as %40
+     * @return
+     */
+    @GetMapping("/getMessageNumbers")
+    public ResponseEntity<List<String>> getMessages(@RequestParam String sender) {
+        List<String> result = dbTemplate.queryForList("select cmac_message_number from cmac_message where " +
+                "cmac_sender = \"" + sender + "\";", String.class);
+
+        return ResponseEntity.ok(result);
     }
 }
