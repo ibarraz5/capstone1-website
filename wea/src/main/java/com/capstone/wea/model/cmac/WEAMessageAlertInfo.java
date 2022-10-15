@@ -1,4 +1,4 @@
-package com.capstone.wea.model;
+package com.capstone.wea.model.cmac;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

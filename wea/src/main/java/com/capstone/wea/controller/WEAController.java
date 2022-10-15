@@ -1,24 +1,25 @@
 package com.capstone.wea.controller;
 
-import com.capstone.wea.model.CollectedUserData;
-import com.capstone.wea.model.WEAMessageModel;
+import com.capstone.wea.model.cmac.CollectedUserData;
+import com.capstone.wea.model.cmac.WEAMessageModel;
+import com.capstone.wea.model.queryresults.MessageListResult;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import com.mysql.cj.jdbc.JdbcConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.JDBCType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 @RequestMapping("/wea")
 @RestController
@@ -103,17 +104,24 @@ public class WEAController {
     }
 
     /**
-     * Gets a list of all cmac_message_numbers from the
-     * given sender in the database.
+     * Gets the list of all CMAC_messages sent by
+     * a specified CMAC_sender. The list contains
+     * the CMAC_message_number and the
+     * CMAC_send_date_time which will be displayed
+     * for the AO after logging onto the website
      *
-     * @param sender A cmac_sender. '@' characters
+     * @param sender A CMAC_sender. '@' characters
      *               must be encoded as %40
-     * @return
+     * @return HTTP 200 OK and a JASON array of
+     *         objects containing a
+     *         CMAC_message_number and a
+     *         CMAC_sent_date_time
      */
-    @GetMapping("/getMessageNumbers")
-    public ResponseEntity<List<String>> getMessages(@RequestParam String sender) {
-        List<String> result = dbTemplate.queryForList("select cmac_message_number from cmac_message where " +
-                "cmac_sender = \"" + sender + "\";", String.class);
+    @GetMapping("/getMessageList")
+    public ResponseEntity<List<MessageListResult>> getMessages(@RequestParam String sender) {
+        List<MessageListResult> result = dbTemplate.query("select cmac_message_number, cmac_sent_date_time from " +
+                "cmac_message where cmac_sender = \"" + sender + "\";",
+                new MessageListResult.MessageListResultMapper());
 
         return ResponseEntity.ok(result);
     }
