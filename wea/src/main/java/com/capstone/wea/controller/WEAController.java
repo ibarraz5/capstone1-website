@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @RequestMapping("/wea")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class WEAController {
     private HashMap<Integer, CollectedUserData> uploads;
