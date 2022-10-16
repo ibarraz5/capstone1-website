@@ -75,6 +75,12 @@ CREATE TABLE cmac_alert_geography (
     CMACCirlce INT NOT NULL,
     CMACCMASGeocode INT NOT NULL
 );
+CREATE TABLE device (
+    DeviceOS VARCHAR(180),
+    DeviceOSVersion VARCHAR(180),
+    DeviceModel VARCHAR(180),
+    DeviceLocation VARCHAR(200)
+);
 ALTER TABLE cmac_alert ADD CONSTRAINT FK_CMACMessageNumber FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cmac_alert ADD CONSTRAINT FK_CMACCAPIdentifier FOREIGN KEY (CMACCapIdentifier) REFERENCES cmac_message (CMACCapIdentifier) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cmac_alert_geography ADD CONSTRAINT FK_CMACMessageNumber FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
