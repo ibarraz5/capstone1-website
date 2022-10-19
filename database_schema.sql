@@ -3,7 +3,7 @@ USE ALERT_DB;
 CREATE TABLE cap_alert (
     MessageID VARCHAR(180) NOT NULL,
     SenderID VARCHAR(180) NOT NULL,
-    MessageSendDate DATE NOT NULL,
+    MessageSendDate DATETIME NOT NULL,
     MessageStatus VARCHAR(180) NOT NULL,
     MessageType VARCHAR(180) NOT NULL,
     Source VARCHAR(180),
@@ -27,9 +27,9 @@ CREATE TABLE cap_info (
     Certainty VARCHAR(180) NOT NULL,
     Audience VARCHAR(180),
     EventCode VARCHAR(180),
-    EffectiveDate DATE,
-    OnsetDate DATE,
-    ExpirationDate DATE,
+    EffectiveDate DATETIME,
+    OnsetDate DATETIME,
+    ExpirationDate DATETIME,
     SenderName VARCHAR(180),
     Headline VARCHAR(180),
     EventDescription VARCHAR(280),
@@ -57,39 +57,52 @@ CREATE TABLE cap_area (
     AreaCeiling INT
 );
 CREATE TABLE cmac_message (
-    CMACMessageNumber INT NOT NULL,
+    CMACMessageNumber VARCHAR(16) NOT NULL,
     CMACCapIdentifier VARCHAR(180) NOT NULL,
     CMACSender VARCHAR(180) NOT NULL,
-    CMACDateTime DATE NOT NULL,
+    CMACDateTime DATETIME NOT NULL,
     CMACMessageType VARCHAR(165) NOT NULL,
     CONSTRAINT PK_CMACMessage PRIMARY KEY (CMACMessageNumber)
 );
 CREATE TABLE cmac_alert (
     CMACSenderName VARCHAR(180) NOT NULL,
     CMACAlertArea VARCHAR(200),
-    CMACExpiresDateTime DATE NOT NULL,
-    CMACMessageNumber INT NOT NULL,
+    CMACExpiresDateTime DATETIME NOT NULL,
+    CMACMessageNumber VARCHAR(16) NOT NULL,
     CMACCapIdentifier VARCHAR(180) NOT NULL
 );
-CREATE TABLE cmac_alert_geography (
-    CMACAreaDescription VARCHAR(200) NOT NULL,
-    CMACPolygon INT NOT NULL,
-    CMACCirlce INT NOT NULL,
-    CMACCMASGeocode INT NOT NULL,
-    CMACMessageNumber INT NOT NULL,
-    CMACCapIdentifier VARCHAR(180) NOT NULL
+CREATE TABLE cmac_polygon_coordinates (
+    CMACMessageNumber VARCHAR(16) NOT NULL,
+    Latitude DECIMAL(5,2) NOT NULL,
+    Longitude DECIMAL(5,2) NOT NULL
+);
+CREATE TABLE cmac_circle_coordinates (
+    CMACMessageNumber VARCHAR(16) NOT NULL,
+    Latitude DECIMAL(5,2) NOT NULL,
+    Longitude DECIMAL(5,2) NOT NULL
+);
+CREATE TABLE cmac_area_description (
+    CMACMessageNumber VARCHAR(16) NOT NULL,
+    AreaName VARCHAR(30) NOT NULL,
+    CMASGeocode INT NOT NULL
 );
 CREATE TABLE device (
+    CMACMessageNumber VARCHAR(16) NOT NULL,
     DeviceOS VARCHAR(180),
     DeviceOSVersion VARCHAR(180),
     DeviceModel VARCHAR(180),
-    DeviceLocation VARCHAR(200)
+    LocationReceived VARCHAR(200),
+    LocationDisplayed VARCHAR(200),
+    TimeReceived TIMESTAMP,
+    TimeDisplayed TIMESTAMP
 );
-ALTER TABLE cmac_alert_geography ADD CONSTRAINT FK_CMACMessageNumber1 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
-ALTER TABLE cmac_alert_geography ADD CONSTRAINT FK_CMACCapIdentifier1 FOREIGN KEY (CMACCapIdentifier) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cmac_message ADD CONSTRAINT FK_CMACCAPIdentifier2 FOREIGN KEY (CMACCapIdentifier) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cap_info ADD CONSTRAINT FK_MessageID FOREIGN KEY (MessageID) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cap_resource ADD CONSTRAINT FK_MessageID2 FOREIGN KEY (MessageID) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cap_area ADD CONSTRAINT FK_MessageID3 FOREIGN KEY (MessageID) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cmac_alert ADD CONSTRAINT FK_CMACMessageNumber2 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cmac_alert ADD CONSTRAINT FK_CMACCapIdentifier3 FOREIGN KEY (CMACCapIdentifier) REFERENCES cmac_message (CMACCapIdentifier) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE device ADD CONSTRAINT FK_CMACMessageNumber3 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE cmac_polygon_coordinates ADD CONSTRAINT FK_CMACMessageNumber4 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE cmac_circle_coordinates ADD CONSTRAINT FK_CMACMessageNumber5 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE cmac_area_description ADD CONSTRAINT FK_CMACMessageNumber6 FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message (CMACMessageNumber) ON DELETE NO ACTION ON UPDATE NO ACTION;
