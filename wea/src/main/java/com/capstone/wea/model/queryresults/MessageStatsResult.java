@@ -15,9 +15,33 @@ public class MessageStatsResult {
     @JsonProperty("averageDelay")
     private int avgDelay;
 
-    @JsonProperty("totalDevices")
-    private int totalDevices;
+    @JsonProperty("deviceCount")
+    private int deviceCount;
 
-    @JsonProperty("totalDevicesOutside")
-    private int devicesOutside;
+    @JsonProperty("outsideDeviceCount")
+    private int outsideDeviceCount;
+
+    public void setAvgTime(int avgTime) {
+        this.avgTime = avgTime;
+    }
+
+    public void setShortTime(int shortTime) {
+        this.shortTime = shortTime;
+    }
+
+    public void setLongTime(int longTime) {
+        this.longTime = longTime;
+    }
+
+    public void setAvgDelay(int avgDelay) {
+        this.avgDelay = avgDelay;
+    }
+
+    public void setDeviceCount(int deviceCount) {
+        this.deviceCount = deviceCount;
+    }
+
+    public void setOutsideDeviceCount(int outsideDeviceCount) {
+        this.outsideDeviceCount = outsideDeviceCount;
+    }
 }

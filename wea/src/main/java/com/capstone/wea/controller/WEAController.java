@@ -2,6 +2,7 @@ package com.capstone.wea.controller;
 
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.queryresults.*;
+import com.capstone.wea.model.queryresults.mappers.*;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +126,7 @@ public class WEAController {
     public ResponseEntity<List<MessageListResult>> getMessageList(@RequestParam String sender) {
         List<MessageListResult> result = dbTemplate.query("select CMACMessageNumber, CMACDateTime from " +
                 "ALERT_DB.cmac_message where CMACSender = \"" + sender + "\";",
-                new MessageListResult.MessageListResultMapper());
+                new MessageListResultMapper());
 
         return ResponseEntity.ok(result);
     }
@@ -152,6 +153,10 @@ public class WEAController {
     @GetMapping("/getMessageStats")
     public ResponseEntity<MessageStatsResult> getMessageStats(@RequestParam String messageNumber) {
         MessageStatsResult result = new MessageStatsResult();
+
+        dbTemplate.query("SELECT count(*) AS DeviceCount from ALERT_DB.device where CMACMessageNumber = " +
+                        "\"00001056\";",
+                new DeviceCountMapper(result));
 
         return ResponseEntity.ok(result);
     }
