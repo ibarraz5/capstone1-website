@@ -165,3 +165,43 @@ ul {
 /* End Of Global Styles */
 /* End Of Global Styles */
 /* End Of Global Styles */
+
+/* Header */
+
+.header-container {
+  height: 5rem;
+  display: flex;
+  gap: 50px;
+  justify-content: left;
+  align-items: left;
+  background: var(--primary-200);
+}
+
+.inner-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+}
+
+.inner-container p {
+  margin-bottom: 0;
+}
+
+.inner-container h4 {
+  margin-bottom: 0;
+}
+
+.logo {
+  height: 80px;
+  width: 160px;
+}
+
+.alert-originator {
+  color: var(--red-dark);
+}
+
+.date {
+  font-size: 1.5rem;
+}
