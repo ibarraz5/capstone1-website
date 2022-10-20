@@ -12,8 +12,8 @@ public class MessageListResult {
         @Override
         public MessageListResult mapRow(ResultSet rs, int rowNum) throws SQLException {
             MessageListResult numberDate = new MessageListResult();
-            numberDate.setMessageNumber(rs.getString("cmac_message_number"));
-            numberDate.setDate(rs.getString("cmac_sent_date_time"));
+            numberDate.setMessageNumber(rs.getString("CMACMessageNumber"));
+            numberDate.setDate(rs.getString("CMACDateTime"));
 
             return numberDate;
         }

@@ -116,8 +116,8 @@ public class WEAController {
      */
     @GetMapping("/getMessageList")
     public ResponseEntity<List<MessageListResult>> getMessageList(@RequestParam String sender) {
-        List<MessageListResult> result = dbTemplate.query("select cmac_message_number, cmac_sent_date_time from " +
-                "cmac_message where cmac_sender = \"" + sender + "\";",
+        List<MessageListResult> result = dbTemplate.query("select CMACMessageNumber, CMACDateTime from " +
+                "ALERT_DB.cmac_message where CMACSender = \"" + sender + "\";",
                 new MessageListResult.MessageListResultMapper());
 
         return ResponseEntity.ok(result);
