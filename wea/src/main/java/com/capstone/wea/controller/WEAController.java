@@ -57,9 +57,10 @@ public class WEAController {
 
     /**
      * Endpoint to which the data collected from the
-     * mobile device will be sent
+     * mobile device will be sent. The uploaded data
+     * will be added to the database
      *
-     * @param userData An xml body containing the data
+     * @param userData An XML body containing the data
      *                 collected from the user
      *
      * @return HTTP 201 CREATED and the URI of the
@@ -73,6 +74,12 @@ public class WEAController {
                 . toUri();
 
         uploads.put(userData.getId(), userData);
+
+        String query = "INSERT INTO ALERT_DB.device VALUES(\"" + userData.getMessageNumber() + "\", NULL, NULL, NULL," +
+                " \"" + userData.getLocationReceived() + "\", \"" + userData.getLocationDisplayed() + "\", \"" +
+                userData.getTimeReceived() + "\", \"" + userData.getTimeDisplayed() + "\");";
+
+        dbTemplate.update(query);
 
         return ResponseEntity.created(location).build();
     }

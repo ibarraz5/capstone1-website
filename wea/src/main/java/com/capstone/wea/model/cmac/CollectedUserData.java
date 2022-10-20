@@ -30,4 +30,24 @@ public class CollectedUserData {
     public int getId() {
         return id;
     }
+
+    public LocalDateTime getTimeReceived() {
+        return timeReceived;
+    }
+
+    public LocalDateTime getTimeDisplayed() {
+        return timeDisplayed;
+    }
+
+    public String getLocationReceived() {
+        return locationReceived;
+    }
+
+    public String getLocationDisplayed() {
+        return locationDisplayed;
+    }
+
+    public String getMessageNumber() {
+        return messageNumber;
+    }
 }
