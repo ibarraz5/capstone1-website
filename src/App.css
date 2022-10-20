@@ -166,6 +166,18 @@ ul {
 /* End Of Global Styles */
 /* End Of Global Styles */
 
+/* Page */
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrap {
+  flex: 1;
+}
+
 /* Header */
 
 .header-container {
@@ -204,4 +216,29 @@ ul {
 
 .date {
   font-size: 1.5rem;
+}
+
+/* Footer */
+
+.footer-container {
+  display: flex;
+  background-color: var(--grey-200);
+  align-items: center;
+  justify-content: left;
+  gap: 25px;
+}
+
+.credits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+}
+
+.credits p {
+  color: var(--grey-600);
+}
+
+.asu-logo {
+  height: 3rem;
 }
