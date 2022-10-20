@@ -37,3 +37,35 @@ table, th, td{
     <table id="table2"></table>
 
  </div>
+
+ <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+ <script type="text/javascript">
+
+
+    function fetchJSON(){
+        $(function(){
+            $.getJSON('sample.json', function(data){
+                console.log('data imported from sample')
+                $.each(data.users,function(i,usr){
+                    $('ul').append('<li>'+'Username: '+usr.username+' Did user receive the alert? '+usr.received+'</li>')
+                })
+            }).error(function(){
+                console.log('error importing data')
+            })
+        })
+        $(function(){
+            $.getJSON('sample.json', function(data){
+                console.log('data imported from sample')
+                $(document.getElementById('table1')).append('<tr>'+'<th>'+
+                    ' Username '+'</th>'+'<th>'+' Received Alert '+'</th>'+'<th>'+'Latency'
+                        +'</th>'+'</tr>')
+                $.each(data.users,function(i,usr){
+                    $(document.getElementById('table1')).append(
+                        '<tr>'+'<th>'+usr.username+'</th>'+'<th>'+usr.received+'</th>'+
+                        '<th>'+usr.latency+'</th>'+'</tr>')
+                })
+            }).error(function(){
+                console.log('error importing data')
+            })
+        })
+    } 
