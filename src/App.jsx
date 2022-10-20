@@ -12,8 +12,12 @@ function App() {
   console.log(context);
   return (
     <main>
-      <Header></Header>
-      <Footer></Footer>
+      <div className="page-content">
+        <div className="content-wrap">
+          <Header></Header>
+        </div>
+        <Footer></Footer>
+      </div>
     </main>
   );
 }
