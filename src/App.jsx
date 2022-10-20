@@ -1,6 +1,7 @@
 import "./App.css";
 import { useGlobalContext } from "./context";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
@@ -12,6 +13,7 @@ function App() {
   return (
     <main>
       <Header></Header>
+      <Footer></Footer>
     </main>
   );
 }
