@@ -101,3 +101,14 @@ table, th, td{
             })
         })
     }
+   //Standardize an answer string so we can compare and accept variations
+   function cleanseAnswer(input="") {
+      var friendlyAnswer = input.toLowerCase()
+      friendlyAnswer = friendlyAnswer.replace("<i>", "")
+      friendlyAnswer = friendlyAnswer.replace("</i>", "")
+      friendlyAnswer = friendlyAnswer.replace(/ /g, "")
+      friendlyAnswer = friendlyAnswer.replace(/"/g, "")
+      friendlyAnswer = friendlyAnswer.replace(/^a /, "")
+      friendlyAnswer = friendlyAnswer.replace(/^an /, "")      
+      return friendlyAnswer.trim()
+   }
