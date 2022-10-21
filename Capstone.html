@@ -69,3 +69,17 @@ table, th, td{
             })
         })
     } 
+    function fetchJSON2(){
+        $(function(){
+            $.getJSON('example1.json', function(data){
+                console.log('data imported from example1')
+                console.log(data.schema.element[0].complexType.sequence.element)
+
+                $(document.getElementById('table2')).append('<tr>'+'<th>'+' Name '+'</th>'+'<th>'
+                    +' Type '+'</th>'+'<th>'+'Min Occurs'+'</th>'+'<th>'+'Max Occurs'+'</th>'+'</tr>')
+                $.each(data.schema.element,function(i,ele){
+                    $(document.getElementById('table2')).append(
+                        '<tr>'+'<th>'+ele.name+'</th>'+'<th>'+ele.type+'</th>'+
+                            +'<th>'+ele.minOccurs+'</th>'+'</tr>')
+                })
+                
