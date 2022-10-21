@@ -6,14 +6,14 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public final class OutsideDeviceCountMapper implements RowMapper<MessageStatsResult> {
+public class ShortestTimeMapper implements RowMapper<MessageStatsResult> {
     private MessageStatsResult result;
-    public OutsideDeviceCountMapper(MessageStatsResult result) {
+    public ShortestTimeMapper(MessageStatsResult result) {
         this.result = result;
     }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-        result.setDeviceCount(rs.getInt("DeviceCount"));
+        result.setShortTime(rs.getTime("ShortTime"));
         return result;
     }
 }
