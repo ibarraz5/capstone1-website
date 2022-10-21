@@ -82,4 +82,17 @@ table, th, td{
                         '<tr>'+'<th>'+ele.name+'</th>'+'<th>'+ele.type+'</th>'+
                             +'<th>'+ele.minOccurs+'</th>'+'</tr>')
                 })
-                
+               $.each(data.schema.element[0].complexType.sequence.element,function(i,ele){
+                    $(document.getElementById('table2')).append(
+                        '<tr>'+'<th>'+ele.name+'</th>'+'<th>'+ele.type+'</th>'+
+                            
+                            '<th>'+ele.maxOccurs+'</th>'+'</tr>')
+                    if(ele.minOccurs="undefined"){
+                        console.log('Min Occurs undefined')
+                    }else if(ele.minOccurs=null){
+                        ele.minOccurs="null"
+                        $(document.getElementById('table2')).append(
+                            '<th>'+ele.minOccurs+'</th>'
+                        )
+                    }
+                })                
