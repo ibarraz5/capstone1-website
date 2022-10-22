@@ -3,14 +3,14 @@ import { useGlobalContext } from "./context";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Alerts from "./components/Alerts";
+import Modal from "./components/Modal";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
 // It will show up in the test text main, and also the developer console.
 
 function App() {
-  const context = useGlobalContext();
-  console.log(context);
+  const { showModal } = useGlobalContext();
 
   return (
     <main>
@@ -18,6 +18,7 @@ function App() {
         <div className="content-wrap">
           <Header></Header>
           <Alerts></Alerts>
+          {showModal && <Modal></Modal>}
         </div>
         <Footer></Footer>
       </div>
