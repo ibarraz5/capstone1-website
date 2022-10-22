@@ -2,6 +2,7 @@ import "./App.css";
 import { useGlobalContext } from "./context";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Alerts from "./components/Alerts";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
@@ -10,12 +11,13 @@ import Footer from "./components/Footer";
 function App() {
   const context = useGlobalContext();
   console.log(context);
-  
+
   return (
     <main>
       <div className="page-content">
         <div className="content-wrap">
           <Header></Header>
+          <Alerts></Alerts>
         </div>
         <Footer></Footer>
       </div>
