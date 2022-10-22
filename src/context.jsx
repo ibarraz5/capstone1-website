@@ -20,26 +20,37 @@ const alerts = [
   {
     CMAC_message_number: "00001056",
     CMAC_sent_date_time: "2022-10-19 20:59:46",
+    averageTime: "00:05:00",
+    shortestTime: "00:05:00",
+    longestTime: "00:05:00",
+    averageDelay: "00:00:36",
+    deviceCount: 2,
+    receivedOutsideCount: 0,
+    displayedOutsideCount: 1,
   },
   {
     CMAC_message_number: "00001057",
     CMAC_sent_date_time: "2022-11-19 21:59:46",
+    averageTime: "00:05:00",
+    shortestTime: "00:05:00",
+    longestTime: "00:05:00",
+    averageDelay: "00:00:36",
+    deviceCount: 2,
+    receivedOutsideCount: 0,
+    displayedOutsideCount: 1,
   },
   {
     CMAC_message_number: "00001058",
     CMAC_sent_date_time: "2022-12-19 10:59:46",
+    averageTime: "00:05:00",
+    shortestTime: "00:05:00",
+    longestTime: "00:05:00",
+    averageDelay: "00:00:36",
+    deviceCount: 2,
+    receivedOutsideCount: 0,
+    displayedOutsideCount: 1,
   },
 ];
-
-const alertMessage = {
-  averageTime: "00:05:00",
-  shortestTime: "00:05:00",
-  longestTime: "00:05:00",
-  averageDelay: "00:00:36",
-  deviceCount: 2,
-  receivedOutsideCount: 0,
-  displayedOutsideCount: 1,
-};
 
 const AppContext = React.createContext();
 
@@ -64,7 +75,7 @@ const AppProvider = ({ children }) => {
   });
 
   return (
-    <AppContext.Provider value={{ date, alerts, alertMessage }}>
+    <AppContext.Provider value={{ date, alerts }}>
       {children}
     </AppContext.Provider>
   );
