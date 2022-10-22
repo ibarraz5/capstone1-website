@@ -15,6 +15,7 @@ const Alerts = () => {
               width="300"
               height="150"
               viewBox="0 0 300 150"
+              className="img"
             >
               <rect fill="#ddd" width="300" height="150" />
               <text
