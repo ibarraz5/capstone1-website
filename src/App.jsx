@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 function App() {
   const context = useGlobalContext();
   console.log(context);
+  
   return (
     <main>
       <div className="page-content">
