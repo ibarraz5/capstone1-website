@@ -11,7 +11,7 @@ public class MessageStatsResult {
     @JsonProperty("shortestTime")
     private Time shortTime;
 
-    @JsonProperty("longestTIme")
+    @JsonProperty("longestTime")
     private Time longTime;
 
     @JsonProperty("averageDelay")
