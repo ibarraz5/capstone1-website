@@ -59,6 +59,8 @@ const AppProvider = ({ children }) => {
   // State Variables
 
   const [date, setDate] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState(null);
 
   // Functions
   const getDate = () => {
@@ -69,13 +71,34 @@ const AppProvider = ({ children }) => {
     setDate(`${month} ${day}, ${year}`);
   };
 
+  const selectAlert = (idAlert) => {
+    let alert;
+
+    alert = alerts.find((alert) => alert.CMAC_message_number === idAlert);
+    setSelectedAlert(alert);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   // useEffects
   useEffect(() => {
     getDate();
   });
 
   return (
-    <AppContext.Provider value={{ date, alerts }}>
+    <AppContext.Provider
+      value={{
+        date,
+        alerts,
+        showModal,
+        selectAlert,
+        selectedAlert,
+        closeModal,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

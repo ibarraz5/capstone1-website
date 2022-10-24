@@ -1,7 +1,7 @@
 import { useGlobalContext } from "../context";
 
 const Alerts = () => {
-  const { alerts } = useGlobalContext();
+  const { alerts, selectAlert } = useGlobalContext();
   return (
     <section className="section-center">
       {alerts.map((alert) => {
@@ -16,6 +16,7 @@ const Alerts = () => {
               height="150"
               viewBox="0 0 300 150"
               className="img"
+              onClick={() => selectAlert(id)}
             >
               <rect fill="#ddd" width="300" height="150" />
               <text
