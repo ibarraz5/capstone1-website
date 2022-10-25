@@ -93,8 +93,8 @@ CREATE TABLE device (
     DeviceModel VARCHAR(180),
     LocationReceived VARCHAR(200),
     LocationDisplayed VARCHAR(200),
-    TimeReceived TIMESTAMP,
-    TimeDisplayed TIMESTAMP
+    TimeReceived DATETIME,
+    TimeDisplayed DATETIME
 );
 ALTER TABLE cmac_message ADD CONSTRAINT FK_CMACCAPIdentifier2 FOREIGN KEY (CMACCapIdentifier) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cap_info ADD CONSTRAINT FK_MessageID FOREIGN KEY (MessageID) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
