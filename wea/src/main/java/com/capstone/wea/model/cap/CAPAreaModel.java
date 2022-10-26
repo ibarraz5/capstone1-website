@@ -2,6 +2,7 @@ package com.capstone.wea.model.cap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public class CAPAreaModel {
     @JsonProperty("polygon")
     private String polygon;
     @JsonProperty("geocode")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<CAPGeocodeModel> geocode;
 }

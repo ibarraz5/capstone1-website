@@ -2,6 +2,7 @@ package com.capstone.wea.model.cap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.time.LocalDateTime;
@@ -23,9 +24,10 @@ public class CAPInfoModel {
     @JsonProperty("certainty")
     private String certainty;
     @JsonProperty("eventCode")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private CAPEventCodeModel eventCode;
     @JsonProperty("expires")
-    private LocalDateTime expires;
+    private String expires;
     @JsonProperty("senderName")
     private String senderName;
     @JsonProperty("headline")
@@ -37,5 +39,6 @@ public class CAPInfoModel {
     @JsonProperty("contact")
     private String contact;
     @JsonProperty("area")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<CAPAreaModel> area;
 }

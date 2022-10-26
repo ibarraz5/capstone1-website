@@ -1,8 +1,10 @@
 package com.capstone.wea.controller;
 
+import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.queryresults.*;
 import com.capstone.wea.model.queryresults.mappers.*;
+import com.capstone.wea.parser.CAPParser;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,6 +207,20 @@ public class WEAController {
                         ") " +
                         "AS DisplayedOutside;",
                 new DisplayedOutsideCountMapper(result));
+
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Parses the sample CAP message file and returns it in an
+     * HTTP response body. This endpoint is for testing purposes
+     * only
+     *
+     * @return HTTP 200 OK and an XML CAP message
+     */
+    @GetMapping(value = "/parseCapMessage", produces = "application/xml")
+    public ResponseEntity<CAPMessageModel> parseCapMessage() {
+        CAPMessageModel result = CAPParser.parse("src/main/resources/sampleCapMessage.xml");
 
         return ResponseEntity.ok(result);
     }

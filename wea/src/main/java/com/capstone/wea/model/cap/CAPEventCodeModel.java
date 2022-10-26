@@ -10,5 +10,5 @@ public class CAPEventCodeModel {
     @JsonProperty("valueName")
     private String valueName;
     @JsonProperty("value")
-    private CAPEventCodeModel value;
+    private String value;
 }
