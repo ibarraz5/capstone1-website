@@ -42,7 +42,7 @@ public class WEAController {
         WEAMessageModel model = null;
 
         try {
-            File message = new File("src/main/resources/sampleMessage.xml");
+            File message = new File("src/main/resources/sampleCmacMessage.xml");
             XmlMapper mapper = new XmlMapper();
             mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
             model = mapper.readValue(message, WEAMessageModel.class);
