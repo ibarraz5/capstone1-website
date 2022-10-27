@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Alerts from "./components/Alerts";
 import Modal from "./components/Modal";
+import Body from "./components/Body";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
@@ -19,6 +20,7 @@ function App() {
           <Header></Header>
           <Alerts></Alerts>
           {showModal && <Modal></Modal>}
+          <Body></Body>
         </div>
         <Footer></Footer>
       </div>
