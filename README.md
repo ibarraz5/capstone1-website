@@ -6,6 +6,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### open a new terminal
+### cd C:\Users\ivanb\Downloads\capstone1-website-main\capstone1-website-main   //make sure you cd into the folder first
 ### `npm install`  -this will install the node modules then you can do npm start to run application
 ### `npm start`
 
