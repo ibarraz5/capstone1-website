@@ -61,6 +61,8 @@ const AppProvider = ({ children }) => {
   const [date, setDate] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [alertOriginator, setAlertOriginator] = useState("");
+  const [login, setLogin] = useState(false);
 
   // Functions
   const getDate = () => {
@@ -88,6 +90,13 @@ const AppProvider = ({ children }) => {
     getDate();
   });
 
+  useEffect(() => {
+    if (!alertOriginator) {
+      return;
+    }
+    setLogin(true);
+  });
+
   return (
     <AppContext.Provider
       value={{
@@ -97,6 +106,9 @@ const AppProvider = ({ children }) => {
         selectAlert,
         selectedAlert,
         closeModal,
+        setAlertOriginator,
+        login,
+        setLogin,
       }}
     >
       {children}
