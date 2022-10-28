@@ -12,18 +12,19 @@ import Login from "./components/Login";
 // It will show up in the test text main, and also the developer console.
 
 function App() {
-  const { showModal } = useGlobalContext();
+  const { showModal, login } = useGlobalContext();
 
   return (
     <main>
       <div className="page-content">
         <div className="content-wrap">
-          <Header></Header>
-          <Alerts></Alerts>
+          {!login && <Login></Login>}
+          {login && <Header></Header>}
+          {login && <Alerts></Alerts>}
           {showModal && <Modal></Modal>}
           <Body></Body>
         </div>
-        <Footer></Footer>
+        {login && <Footer></Footer>}
       </div>
     </main>
   );
