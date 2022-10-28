@@ -87,13 +87,15 @@ CREATE TABLE cmac_area_description (
 );
 CREATE TABLE device (
     CMACMessageNumber VARCHAR(16) NOT NULL,
+    InternalDeviceID VARCHAR(180) NOT NULL,
     DeviceOS VARCHAR(180),
     DeviceOSVersion VARCHAR(180),
     DeviceModel VARCHAR(180),
     LocationReceived VARCHAR(200),
     LocationDisplayed VARCHAR(200),
     TimeReceived DATETIME,
-    TimeDisplayed DATETIME
+    TimeDisplayed DATETIME,
+    CONSTRAINT PK_DeviceID PRIMARY KEY (InternalDeviceID)
 );
 ALTER TABLE cmac_message ADD CONSTRAINT FK_CMACCAPIdentifier2 FOREIGN KEY (CMACCapIdentifier) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE cap_info ADD CONSTRAINT FK_MessageID FOREIGN KEY (MessageID) REFERENCES cap_alert (MessageID) ON DELETE NO ACTION ON UPDATE NO ACTION;
