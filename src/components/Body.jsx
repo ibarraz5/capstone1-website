@@ -14,6 +14,8 @@
                         "SNM: AVISO DE INUNDACIONES REPENTINAS hasta 11:00AM CST. Evite areas inundadas.",
                         "Servicio Nacional de Meteorologia: AVISO DE INUNDACIONES REPENTINAS en efecto para esta area hasta las 6:00AM EDT. Esta es una situacion peligrosa y amenaza la vida. No intente viajar a menos que sea para abandonar un area propensa a inundaciones o bajo una orden de desalojo.",
         ]
+        let data = require('./sample.json');
+
 const Body = () => {
 
     return (
@@ -23,6 +25,21 @@ const Body = () => {
             <div id="alert1" className="wea-alert"></div>
             <button className="button-1" onClick={WEASpanish}>Wea Spanish</button>
             <div id="alert2" className="wea-alert"></div>
+            <button className="button-1" onClick={fetchJSON}>Display Data</button>
+            <div id="alert3" className="wea-alert">
+            <table id="table1">
+                        {data.map((usr) => {
+                            return(
+                            <tr>
+                                <td>{usr.username}</td>
+                                <td>{usr.received}</td>
+                                <td>{usr.latency}</td>
+                            </tr>
+                            )
+                        })}
+            </table>
+            </div>
+
         </div>
 
     </div>
@@ -54,5 +71,23 @@ function WEASpanish(){
     }
     count2++        
 }
+let string1= ""
+const array1=[]
+function fetchJSON(){
+
+console.log(data[0].username)
+
+for (let i = 0; i < data.length; i++) {
+    string1= "Username:"+data[i].username+"Alert Received:"+data[i].received
+    array1.push(string1)
+}
+document.getElementById('alert3').innerHTML= array1
+
+} 
+
+
+
+
+
 
 export default Body;
