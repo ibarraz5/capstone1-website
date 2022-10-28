@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Alerts from "./components/Alerts";
 import Modal from "./components/Modal";
 import Body from "./components/Body";
+import Login from "./components/Login";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
