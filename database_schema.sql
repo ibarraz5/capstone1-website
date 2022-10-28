@@ -66,7 +66,6 @@ CREATE TABLE cmac_message (
 );
 CREATE TABLE cmac_alert (
     CMACSenderName VARCHAR(180) NOT NULL,
-    CMACAlertArea VARCHAR(200),
     CMACExpiresDateTime DATETIME NOT NULL,
     CMACMessageNumber VARCHAR(16) NOT NULL,
     CMACCapIdentifier VARCHAR(180) NOT NULL
