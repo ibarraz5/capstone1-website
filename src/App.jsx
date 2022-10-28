@@ -22,7 +22,7 @@ function App() {
           {login && <Header></Header>}
           {login && <Alerts></Alerts>}
           {showModal && <Modal></Modal>}
-          <Body></Body>
+          {login && <Body></Body>}
         </div>
         {login && <Footer></Footer>}
       </div>
