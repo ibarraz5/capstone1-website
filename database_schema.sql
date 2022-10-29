@@ -87,7 +87,7 @@ CREATE TABLE cmac_area_description (
 );
 CREATE TABLE device (
     CMACMessageNumber VARCHAR(16) NOT NULL,
-    InternalDeviceID VARCHAR(180) NOT NULL,
+    InternalDeviceID INT NOT NULL AUTO_INCREMENT,
     DeviceOS VARCHAR(180),
     DeviceOSVersion VARCHAR(180),
     DeviceModel VARCHAR(180),
