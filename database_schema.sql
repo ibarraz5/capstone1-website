@@ -91,8 +91,8 @@ CREATE TABLE device (
     DeviceOS VARCHAR(180),
     DeviceOSVersion VARCHAR(180),
     DeviceModel VARCHAR(180),
-    LocationReceived VARCHAR(200),
-    LocationDisplayed VARCHAR(200),
+    LocationReceived INT,
+    LocationDisplayed INT,
     TimeReceived DATETIME,
     TimeDisplayed DATETIME,
     CONSTRAINT PK_DeviceID PRIMARY KEY (InternalDeviceID)
