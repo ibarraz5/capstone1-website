@@ -1,10 +1,19 @@
 import { useGlobalContext } from "../context";
 
 const Alerts = () => {
-  const { alerts, selectAlert } = useGlobalContext();
+  const { selectAlert, dbAlertList } = useGlobalContext();
+
+  if (dbAlertList.length < 1) {
+    return (
+      <section>
+        <h4>No alerts have been retrieved.</h4>
+      </section>
+    );
+  }
+
   return (
     <section className="section-center">
-      {alerts.map((alert) => {
+      {dbAlertList.map((alert) => {
         const { CMAC_message_number: id, CMAC_sent_date_time: dateTime } =
           alert;
 
@@ -21,13 +30,13 @@ const Alerts = () => {
               <rect fill="#ddd" width="300" height="150" />
               <text
                 fill="rgba(0,0,0,0.5)"
-                font-family="sans-serif"
-                font-size="30"
+                fontFamily="sans-serif"
+                fontSize="30"
                 dy="10.5"
-                font-weight="bold"
+                fontWeight="bold"
                 x="50%"
                 y="50%"
-                text-anchor="middle"
+                textAnchor="middle"
               >
                 300×150
               </text>

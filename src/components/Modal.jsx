@@ -38,13 +38,13 @@ const Modal = () => {
           <rect fill="#ddd" width="300" height="150" />
           <text
             fill="rgba(0,0,0,0.5)"
-            font-family="sans-serif"
-            font-size="30"
+            fontFamily="sans-serif"
+            fontSize="30"
             dy="10.5"
-            font-weight="bold"
+            fontWeight="bold"
             x="50%"
             y="50%"
-            text-anchor="middle"
+            textAnchor="middle"
           >
             300×150
           </text>
