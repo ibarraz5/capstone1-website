@@ -34,7 +34,41 @@ public class CAPProcessor {
         return model;
     }
 
+    /**
+     * Converts a CAP message to a CMAC message
+     *
+     * TODO: too many unknowns until I can get some real messages from IPAWS
+     * Also, should there just be a constructor for each CMAC model that takes
+     * the equivalent CAP model as a param? Makes more sense for CMAC to be in
+     * charge of how to map attributes
+     *
+     * @param cap The CAP message to convert
+     * @return A CMACMessageModel derived from the CAP message
+     */
     public static CMACMessageModel capToCmac(CAPMessageModel cap) {
+        CMACMessageModel cmac = new CMACMessageModel();
+
+        /**
+         * CMAC message number must be dynamically generated because cap identifier
+         * does not follow the same convention
+         * Current plan: SLECT MAX(CMACMessageNumber) FROM alert_db.cmac_message;
+         *
+         * convert result to hex
+         * add 1
+         * convert back to string
+         */
+        cmac.setMessageNumber("");
+        cmac.setSender(cap.getSender());
+        cmac.setSentDateTime(cap.getSent());
+        cmac.setStatus(cap.getStatus());
+        cmac.setMessageType(cap.getMsgType());
+        //TODO: Hmm.. This is the endpoint to find this specific message. Should this lead back to us?
+        //if so, sendingGatewayId needs changed to match out uri as well
+        cmac.setAlertUri("");
+        //TODO: this must also be dynamically generated
+        cmac.setCapIdentifier("");
+        //TODO: should this be LocalDateTime.Now()?
+        cmac.setCapSentDateTime(cap.getSent());
         return null;
     }
 }

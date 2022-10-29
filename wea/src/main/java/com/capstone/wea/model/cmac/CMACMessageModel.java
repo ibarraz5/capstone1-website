@@ -11,9 +11,9 @@ public class CMACMessageModel {
     @JacksonXmlProperty(isAttribute = true)
     private String xmlns = "cmac:2.0";
     @JsonProperty("CMAC_protocol_version")
-    private String protocolVersion;
+    private String protocolVersion = "2.0";
     @JsonProperty("CMAC_sending_gateway_id")
-    private String sendingGatewayId;
+    private String sendingGatewayId = "http://wea_alert_gateway.gov";
     @JsonProperty("CMAC_message_number")
     private String messageNumber;
 
@@ -41,27 +41,51 @@ public class CMACMessageModel {
     @JsonProperty("CMAC_alert_info")
     private CMACMessageAlertInfo alertInfo;
 
-    public String getMessageNumber() {
-        return messageNumber;
+    public void setXmlns(String xmlns) {
+        this.xmlns = xmlns;
     }
 
-    public String getSender() {
-        return sender;
+    public void setProtocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
-    public String getSentDateTime() {
-        return sentDateTime;
+    public void setSendingGatewayId(String sendingGatewayId) {
+        this.sendingGatewayId = sendingGatewayId;
     }
 
-    public String getMessageType() {
-        return messageType;
+    public void setMessageNumber(String messageNumber) {
+        this.messageNumber = messageNumber;
     }
 
-    public String getCapIdentifier() {
-        return capIdentifier;
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
-    public CMACMessageAlertInfo getAlertInfo() {
-        return alertInfo;
+    public void setSentDateTime(String sentDateTime) {
+        this.sentDateTime = sentDateTime;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
+    public void setAlertUri(String alertUri) {
+        this.alertUri = alertUri;
+    }
+
+    public void setCapIdentifier(String capIdentifier) {
+        this.capIdentifier = capIdentifier;
+    }
+
+    public void setCapSentDateTime(String capSentDateTime) {
+        this.capSentDateTime = capSentDateTime;
+    }
+
+    public void setAlertInfo(CMACMessageAlertInfo alertInfo) {
+        this.alertInfo = alertInfo;
     }
 }

@@ -29,4 +29,36 @@ public class CAPMessageModel {
     @JsonProperty("info")
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<CAPInfoModel> info;
+
+    public String getXmlns() {
+        return xmlns;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public String getSent() {
+        return sent;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public List<CAPInfoModel> getInfo() {
+        return info;
+    }
 }
