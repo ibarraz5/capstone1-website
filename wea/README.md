@@ -2,6 +2,13 @@
 
 This document provides an overview on how to start the server and use the API.
 
+## Database Setup
+
+Before running this application, make sure your database is up-to-date with the latest schema and has some sample 
+data to query. You can use Alex's `database_schema.sql` query to set up the database and then created your own sample 
+data, or you can use the `alert_db_setup.sql` query found this project's root directory to create both the schema 
+and populate it with sample data.
+
 ## Starting the Server
 
 Java JDK 17 is required to run this project. This SpringBoot application can be run in your IDE as you would any other 
