@@ -10,9 +10,11 @@ command in linux, or `gradle bootRun` in Windows.
 
 ## Making API Requests
 
-The host for WEA API endpoints is always http://localhost:8080/wea
+The host for WEA API endpoints is always `http://localhost:8080/wea`. In this projects root directory, there is a 
+json file named `API_Tests.har`. This is an `HAR - HTTP Archive Format` file that can imported in either Insomnia or
+Postman to test the API endpoints.
 
-At this time. the WEA API *does not* support HTTPS.
+At this time, the WEA API *does not* support HTTPS.
 
 ## Endpoint List
 
