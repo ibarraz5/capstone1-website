@@ -4,8 +4,9 @@ This document provides an overview on how to start the server and use the API.
 
 ## Starting the Server
 
-This SpringBoot application can be run in your IDE as you would any other application, or by navigating to this 
-project's root directory in the terminal and using the `./gradlew bootRun` command
+Java JDK 17 is required to run this project. This SpringBoot application can be run in your IDE as you would any other 
+application, or by navigating to this project's root directory in the terminal and using the `./gradlew bootRun` 
+command in linux, or `gradle bootRun` in Windows. 
 
 ## Making API Requests
 

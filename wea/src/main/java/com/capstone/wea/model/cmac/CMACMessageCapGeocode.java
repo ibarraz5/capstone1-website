@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_cap_geocode")
-public class WEAMessageCapGeocode {
+public class CMACMessageCapGeocode {
     @JsonProperty("valueName")
     private String name;
     @JsonProperty("value")

@@ -9,7 +9,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_alert_info")
-public class WEAMessageAlertInfo {
+public class CMACMessageAlertInfo {
     @JsonProperty("CMAC_category")
     private String category;
     @JsonProperty("CMAC_severity")
@@ -26,11 +26,11 @@ public class WEAMessageAlertInfo {
 
     @JsonProperty("CMAC_Alert_Area")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<WEAMessageAlertArea> alertAreaList;
+    private List<CMACMessageAlertArea> alertAreaList;
 
     @JsonProperty("CMAC_Alert_Text")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<WEAMessageAlertText> alertTextList;
+    private List<CMACMessageAlertText> alertTextList;
 
     public String getExpires() {
         return expires;

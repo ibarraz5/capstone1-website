@@ -11,7 +11,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Area")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class WEAMessageAlertArea {
+public class CMACMessageAlertArea {
     @JsonProperty("CMAC_area_description")
     private String areaDescription;
 
@@ -26,7 +26,7 @@ public class WEAMessageAlertArea {
     private List<String> geocodeList;
     @JsonProperty("CMAC_cap_geocode")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<WEAMessageCapGeocode> capGeocodeList;
+    private List<CMACMessageCapGeocode> capGeocodeList;
 
     public String getAreaDescription() {
         return areaDescription;

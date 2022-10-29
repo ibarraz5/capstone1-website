@@ -4,7 +4,7 @@ import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.queryresults.*;
 import com.capstone.wea.model.queryresults.mappers.*;
-import com.capstone.wea.parser.CAPParser;
+import com.capstone.wea.processor.CAPProcessor;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,14 @@ public class WEAController {
      * @return HTTP 200 OK and an XML formatted WEA message
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
-    public ResponseEntity<WEAMessageModel> getMessage() {
-        WEAMessageModel model = null;
+    public ResponseEntity<CMACMessageModel> getMessage() {
+        CMACMessageModel model = null;
 
         try {
             File message = new File("src/main/resources/sampleCmacMessage.xml");
             XmlMapper mapper = new XmlMapper();
             mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
-            model = mapper.readValue(message, WEAMessageModel.class);
+            model = mapper.readValue(message, CMACMessageModel.class);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
@@ -220,7 +220,7 @@ public class WEAController {
      */
     @GetMapping(value = "/parseCapMessage", produces = "application/xml")
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
-        CAPMessageModel result = CAPParser.parse("src/main/resources/sampleCapMessage.xml");
+        CAPMessageModel result = CAPProcessor.parse("src/main/resources/sampleCapMessage.xml");
 
         return ResponseEntity.ok(result);
     }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
-public class WEAMessageModel {
+public class CMACMessageModel {
     @JacksonXmlProperty(isAttribute = true)
     private String xmlns = "cmac:2.0";
     @JsonProperty("CMAC_protocol_version")
@@ -39,7 +39,7 @@ public class WEAMessageModel {
     private String capSentDateTime;
 
     @JsonProperty("CMAC_alert_info")
-    private WEAMessageAlertInfo alertInfo;
+    private CMACMessageAlertInfo alertInfo;
 
     public String getMessageNumber() {
         return messageNumber;
@@ -61,7 +61,7 @@ public class WEAMessageModel {
         return capIdentifier;
     }
 
-    public WEAMessageAlertInfo getAlertInfo() {
+    public CMACMessageAlertInfo getAlertInfo() {
         return alertInfo;
     }
 }
