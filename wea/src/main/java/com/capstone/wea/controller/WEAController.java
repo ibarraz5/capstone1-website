@@ -79,7 +79,7 @@ public class WEAController {
 
         uploads.put(userData.getId(), userData);
 
-        String query = "INSERT INTO ALERT_DB.device VALUES(\"" + userData.getMessageNumber() + "\", NULL, NULL, NULL," +
+        String query = "INSERT INTO alert_db.device VALUES(\"" + userData.getMessageNumber() + "\", NULL, NULL, NULL," +
                 " \"" + userData.getLocationReceived() + "\", \"" + userData.getLocationDisplayed() + "\", \"" +
                 userData.getTimeReceived() + "\", \"" + userData.getTimeDisplayed() + "\");";
 
@@ -127,7 +127,7 @@ public class WEAController {
     @GetMapping("/getMessageList")
     public ResponseEntity<List<MessageListResult>> getMessageList(@RequestParam String sender) {
         List<MessageListResult> result = dbTemplate.query("SELECT CMACMessageNumber, CMACDateTime FROM " +
-                "ALERT_DB.cmac_message WHERE CMACSender = \"" + sender + "\";",
+                "alert_db.cmac_message WHERE CMACSender = \"" + sender + "\";",
                 new MessageListResultMapper());
 
         return ResponseEntity.ok(result);
@@ -158,37 +158,37 @@ public class WEAController {
         //TODO: query DB to make sure message exists?
         MessageStatsResult result = new MessageStatsResult();
 
-        dbTemplate.query("SELECT COUNT(*) AS DeviceCount FROM ALERT_DB.device WHERE CMACMessageNumber = " +
+        dbTemplate.query("SELECT COUNT(*) AS DeviceCount FROM alert_db.device WHERE CMACMessageNumber = " +
                         "\"" + messageNumber + "\";",
                 new DeviceCountMapper(result));
 
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                        "cmac_message.CMACDateTime)))) AS TIME) as AvgTime FROM ALERT_DB.device INNER JOIN " +
-                        "ALERT_DB.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
+        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
+                        "cmac_message.CMACDateTime)))) AS TIME) as AvgTime FROM alert_db.device INNER JOIN " +
+                        "alert_db.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
                 new AverageTimeMapper(result));
 
-        dbTemplate.query("SELECT MIN(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                    "cmac_message.CMACDateTime)) as ShortTime FROM ALERT_DB.device JOIN ALERT_DB.cmac_message " +
+        dbTemplate.query("SELECT MIN(TIMEDIFF(device.TimeReceived, " +
+                    "cmac_message.CMACDateTime)) as ShortTime FROM alert_db.device JOIN alert_db.cmac_message " +
                     "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
                 new ShortestTimeMapper(result));
 
-        dbTemplate.query("SELECT MAX(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                        "cmac_message.CMACDateTime)) as LongTime FROM ALERT_DB.device JOIN ALERT_DB.cmac_message " +
+        dbTemplate.query("SELECT MAX(TIMEDIFF(device.TimeReceived, " +
+                        "cmac_message.CMACDateTime)) as LongTime FROM alert_db.device JOIN alert_db.cmac_message " +
                         "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
                 new LongestTimeMapper(result));
 
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(CAST(device.TimeDisplayed as DATETIME), " +
-                        "CAST(device.TimeReceived as DATETIME))))) AS TIME) as AvgDelay FROM ALERT_DB.device JOIN " +
-                        "ALERT_DB.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
+        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, " +
+                        "device.TimeReceived)))) AS TIME) as AvgDelay FROM alert_db.device JOIN " +
+                        "alert_db.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
                 new AverageDelayMapper(result));
 
         dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from ALERT_DB.device where CMACMessageNumber = \"" +
+                        "SELECT count(*) AS DeviceCount from alert_db.device where CMACMessageNumber = \"" +
                             messageNumber + "\"" +
                         ") - (" +
                         "SELECT COUNT(*) " +
-                        "FROM ALERT_DB.device JOIN ALERT_DB.cmac_area_description " +
-                        "WHERE device.LocationReceived = CAST(cmac_area_description.CMASGeocode AS CHAR) " +
+                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
+                        "WHERE device.LocationReceived = cmac_area_description.CMASGeocode " +
                         "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
                         "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
                         ") " +
@@ -196,12 +196,12 @@ public class WEAController {
                 new ReceivedOutsideCountMapper(result));
 
         dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from ALERT_DB.device where CMACMessageNumber = \"" +
+                        "SELECT count(*) AS DeviceCount from alert_db.device where CMACMessageNumber = \"" +
                             messageNumber + "\"" +
                         ") - (" +
                         "SELECT COUNT(*) " +
-                        "FROM ALERT_DB.device JOIN ALERT_DB.cmac_area_description " +
-                        "WHERE device.LocationDisplayed = CAST(cmac_area_description.CMASGeocode AS CHAR) " +
+                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
+                        "WHERE device.LocationDisplayed = cmac_area_description.CMASGeocode " +
                         "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
                         "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
                         ") " +
