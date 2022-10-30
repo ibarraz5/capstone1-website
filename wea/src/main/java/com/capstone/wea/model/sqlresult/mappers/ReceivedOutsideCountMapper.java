@@ -1,6 +1,6 @@
-package com.capstone.wea.model.queryresults.mappers;
+package com.capstone.wea.model.sqlresult.mappers;
 
-import com.capstone.wea.model.queryresults.MessageStatsResult;
+import com.capstone.wea.model.sqlresult.MessageStatsResult;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

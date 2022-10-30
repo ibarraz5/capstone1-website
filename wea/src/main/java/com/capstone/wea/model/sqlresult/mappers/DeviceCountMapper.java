@@ -1,19 +1,19 @@
-package com.capstone.wea.model.queryresults.mappers;
+package com.capstone.wea.model.sqlresult.mappers;
 
-import com.capstone.wea.model.queryresults.MessageStatsResult;
+import com.capstone.wea.model.sqlresult.MessageStatsResult;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ShortestTimeMapper implements RowMapper<MessageStatsResult> {
+public final class DeviceCountMapper implements RowMapper<MessageStatsResult> {
     private MessageStatsResult result;
-    public ShortestTimeMapper(MessageStatsResult result) {
+    public DeviceCountMapper(MessageStatsResult result) {
         this.result = result;
     }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-        result.setShortTime(rs.getTime("ShortTime"));
+        result.setDeviceCount(rs.getInt("DeviceCount"));
         return result;
     }
 }

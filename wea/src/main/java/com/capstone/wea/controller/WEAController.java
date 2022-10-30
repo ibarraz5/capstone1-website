@@ -2,8 +2,8 @@ package com.capstone.wea.controller;
 
 import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
-import com.capstone.wea.model.queryresults.*;
-import com.capstone.wea.model.queryresults.mappers.*;
+import com.capstone.wea.model.sqlresult.*;
+import com.capstone.wea.model.sqlresult.mappers.*;
 import com.capstone.wea.processor.CAPProcessor;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
 
@@ -163,24 +164,14 @@ public class WEAController {
                 new DeviceCountMapper(result));
 
         dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
-                        "cmac_message.CMACDateTime)))) AS TIME) as AvgTime FROM alert_db.device INNER JOIN " +
-                        "alert_db.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new AverageTimeMapper(result));
-
-        dbTemplate.query("SELECT MIN(TIMEDIFF(device.TimeReceived, " +
-                    "cmac_message.CMACDateTime)) as ShortTime FROM alert_db.device JOIN alert_db.cmac_message " +
-                    "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new ShortestTimeMapper(result));
-
-        dbTemplate.query("SELECT MAX(TIMEDIFF(device.TimeReceived, " +
-                        "cmac_message.CMACDateTime)) as LongTime FROM alert_db.device JOIN alert_db.cmac_message " +
-                        "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new LongestTimeMapper(result));
-
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, " +
-                        "device.TimeReceived)))) AS TIME) as AvgDelay FROM alert_db.device JOIN " +
-                        "alert_db.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new AverageDelayMapper(result));
+                "cmac_message.CMACDateTime)))) AS TIME) as AvgTime, MAX(TIMEDIFF(device.TimeReceived, " +
+                "cmac_message.CMACDateTime)) as LongTime, " +
+                "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) as ShortTime, " +
+                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS TIME) as " +
+                "AvgDelay " +
+                "FROM alert_db.device JOIN alert_db.cmac_message " +
+                "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
+                new TimeMapper(result));
 
         dbTemplate.query("SELECT (" +
                         "SELECT count(*) AS DeviceCount from alert_db.device where CMACMessageNumber = \"" +

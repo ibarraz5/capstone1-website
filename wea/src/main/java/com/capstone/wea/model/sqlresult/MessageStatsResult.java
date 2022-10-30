@@ -1,4 +1,4 @@
-package com.capstone.wea.model.queryresults;
+package com.capstone.wea.model.sqlresult;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

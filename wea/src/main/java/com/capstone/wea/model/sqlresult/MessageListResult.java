@@ -1,11 +1,6 @@
-package com.capstone.wea.model.queryresults;
+package com.capstone.wea.model.sqlresult;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.jdbc.core.RowMapper;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class MessageListResult {
     @JsonProperty("CMAC_message_number")
