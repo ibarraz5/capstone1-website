@@ -13,6 +13,8 @@ public final class DeviceCountMapper implements RowMapper<MessageStatsResult> {
     }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+        result.setMessageNumber(rs.getString("CMACMessageNumber"));
+        result.setDate(rs.getString("CMACDateTime"));
         result.setDeviceCount(rs.getInt("DeviceCount"));
         return result;
     }

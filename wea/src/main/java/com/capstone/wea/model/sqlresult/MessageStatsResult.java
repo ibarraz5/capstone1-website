@@ -5,6 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.sql.Time;
 
 public class MessageStatsResult {
+    @JsonProperty("messageNumber")
+    private String messageNumber;
+
+    @JsonProperty("date")
+    private String date;
     @JsonProperty("averageTime")
     private Time avgTime;
 
@@ -25,6 +30,25 @@ public class MessageStatsResult {
 
     @JsonProperty("displayedOutsideCount")
     private int displayedOutsideCount;
+
+    /**
+     * Sets the CMAC_message number for this message
+     *
+     * @param messageNumber
+     */
+    public void setMessageNumber(String messageNumber) {
+        this.messageNumber = messageNumber;
+    }
+
+    /**
+     * Sets the date that this message was issued by
+     * the AO
+     *
+     * @param date
+     */
+    public void setDate(String date) {
+        this.date = date;
+    }
 
     /**
      * Sets the average time between when a message

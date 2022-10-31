@@ -159,8 +159,11 @@ public class WEAController {
         //TODO: query DB to make sure message exists?
         MessageStatsResult result = new MessageStatsResult();
 
-        dbTemplate.query("SELECT COUNT(*) AS DeviceCount FROM alert_db.device WHERE CMACMessageNumber = " +
-                        "\"" + messageNumber + "\";",
+        dbTemplate.query("SELECT cmac_message.CMACMessageNumber, cmac_message.CMACDateTime, " +
+                        "COUNT(CASE device.CMACMessageNumber WHEN cmac_message.CMACMessageNumber THEN 1 ELSE NULL " +
+                        "END) as DeviceCount " +
+                        "FROM alert_db.device JOIN alert_db.cmac_message " +
+                        "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
                 new DeviceCountMapper(result));
 
         dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
