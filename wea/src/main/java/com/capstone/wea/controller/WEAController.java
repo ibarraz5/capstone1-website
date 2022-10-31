@@ -17,7 +17,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
 
@@ -159,12 +158,14 @@ public class WEAController {
         //TODO: query DB to make sure message exists?
         MessageStatsResult result = new MessageStatsResult();
 
-        dbTemplate.query("SELECT cmac_message.CMACMessageNumber, cmac_message.CMACDateTime, " +
+        result.setMessageNumber(messageNumber);
+
+        dbTemplate.query("SELECT cmac_message.CMACDateTime, " +
                         "COUNT(CASE device.CMACMessageNumber WHEN cmac_message.CMACMessageNumber THEN 1 ELSE NULL " +
                         "END) as DeviceCount " +
                         "FROM alert_db.device JOIN alert_db.cmac_message " +
                         "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new DeviceCountMapper(result));
+                new DateDeviceCountMapper(result));
 
         dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
                 "cmac_message.CMACDateTime)))) AS TIME) as AvgTime, MAX(TIMEDIFF(device.TimeReceived, " +
