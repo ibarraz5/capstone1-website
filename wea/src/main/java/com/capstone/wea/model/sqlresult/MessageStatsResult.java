@@ -1,5 +1,6 @@
 package com.capstone.wea.model.sqlresult;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.sql.Time;
@@ -25,16 +26,16 @@ public class MessageStatsResult {
     @JsonProperty("deviceCount")
     private int deviceCount;
 
-    @JsonProperty("receivedOutsideCount")
-    private int receivedOutsideCount;
+    @JsonIgnoreProperties
+    private int receivedInsideCount;
 
-    @JsonProperty("displayedOutsideCount")
-    private int displayedOutsideCount;
+    @JsonIgnoreProperties
+    private int displayedInsideCount;
 
     /**
      * Sets the CMAC_message number for this message
      *
-     * @param messageNumber
+     * @param messageNumber the message number
      */
     public void setMessageNumber(String messageNumber) {
         this.messageNumber = messageNumber;
@@ -44,7 +45,7 @@ public class MessageStatsResult {
      * Sets the date that this message was issued by
      * the AO
      *
-     * @param date
+     * @param date the date
      */
     public void setDate(String date) {
         this.date = date;
@@ -54,7 +55,7 @@ public class MessageStatsResult {
      * Sets the average time between when a message
      * was sent and when all the devices received it
      *
-     * @param avgTime
+     * @param avgTime the average time
      */
     public void setAvgTime(Time avgTime) {
         this.avgTime = avgTime;
@@ -65,7 +66,7 @@ public class MessageStatsResult {
      * all devices received a message and when it
      * was sent
      *
-     * @param shortTime
+     * @param shortTime the shortest time
      */
     public void setShortTime(Time shortTime) {
         this.shortTime = shortTime;
@@ -76,7 +77,7 @@ public class MessageStatsResult {
      * all devices received a message and when it
      * was sent
      *
-     * @param longTime
+     * @param longTime the longest time
      */
     public void setLongTime(Time longTime) {
         this.longTime = longTime;
@@ -87,7 +88,7 @@ public class MessageStatsResult {
      * when all devices received a message and
      * when it was displayed on the device
      *
-     * @param avgDelay
+     * @param avgDelay the average delay
      */
     public void setAvgDelay(Time avgDelay) {
         this.avgDelay = avgDelay;
@@ -96,29 +97,53 @@ public class MessageStatsResult {
     /**
      * Sets the number of devices that received a message
      *
-     * @param deviceCount
+     * @param deviceCount the number of devices
      */
     public void setDeviceCount(int deviceCount) {
         this.deviceCount = deviceCount;
     }
 
     /**
-     * Sets the number of devices that were outside the
+     * Sets the number of devices that were inside the
      * message's target area when the message was received
      *
-     * @param receivedOutsideCount
+     * @param receivedInsideCount the number of devices
      */
-    public void setReceivedOutsideCount(int receivedOutsideCount) {
-        this.receivedOutsideCount = receivedOutsideCount;
+    public void setReceivedInsideCount(int receivedInsideCount) {
+        this.receivedInsideCount = receivedInsideCount;
     }
 
     /**
-     * Sets the number of devices that were outside the
+     * Sets the number of devices that were inside the
      * message's target area when the message was displayed
      *
-     * @param displayedOutsideCount
+     * @param displayedInsideCount the number of devices
      */
-    public void setDisplayedOutsideCount(int displayedOutsideCount) {
-        this.displayedOutsideCount = displayedOutsideCount;
+    public void setDisplayedInsideCount(int displayedInsideCount) {
+        this.displayedInsideCount = displayedInsideCount;
+    }
+
+    /**
+     * Gets the number of devices for which the message
+     * was received while the device was outside the
+     * target area
+     *
+     * @return The number of devices
+     */
+    @JsonProperty("receivedOutsideCount")
+    public int getReceivedOutsideCount() {
+        return deviceCount - receivedInsideCount;
+    }
+
+    /**
+     * Gets the number of devices for which the message
+     * was received while the device was outside the
+     * target area
+     *
+     * @return The number of devices
+     */
+    @JsonProperty("displayedOutsideCount")
+    public int getDisplayedOutsideCount() {
+        return deviceCount - displayedInsideCount;
     }
 }

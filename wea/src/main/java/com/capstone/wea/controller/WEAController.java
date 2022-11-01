@@ -155,54 +155,29 @@ public class WEAController {
      */
     @GetMapping("/getMessageStats")
     public ResponseEntity<MessageStatsResult> getMessageStats(@RequestParam String messageNumber) {
-        //TODO: query DB to make sure message exists?
         MessageStatsResult result = new MessageStatsResult();
-
         result.setMessageNumber(messageNumber);
 
-        dbTemplate.query("SELECT cmac_message.CMACDateTime, " +
-                        "COUNT(CASE device.CMACMessageNumber WHEN cmac_message.CMACMessageNumber THEN 1 ELSE NULL " +
-                        "END) as DeviceCount " +
+        dbTemplate.query("SELECT cmac_message.CMACDateTime, SUM(CASE device.CMACMessageNumber WHEN " +
+                        "cmac_message.CMACMessageNumber THEN 1 ELSE 0 END) AS DeviceCount, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
+                        "cmac_message.CMACDateTime)))) AS TIME) AS AvgTime, " +
+                        "MAX(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS LongTime, " +
+                        "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS ShortTime, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS " +
+                        "TIME) AS AvgDelay " +
                         "FROM alert_db.device JOIN alert_db.cmac_message " +
-                        "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new DateDeviceCountMapper(result));
+                        "WHERE cmac_message.CMACMessageNumber = '" + messageNumber + "';",
+                new StatsResultsMapper(result));
 
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
-                "cmac_message.CMACDateTime)))) AS TIME) as AvgTime, MAX(TIMEDIFF(device.TimeReceived, " +
-                "cmac_message.CMACDateTime)) as LongTime, " +
-                "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) as ShortTime, " +
-                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS TIME) as " +
-                "AvgDelay " +
-                "FROM alert_db.device JOIN alert_db.cmac_message " +
-                "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new TimeMapper(result));
-
-        dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from alert_db.device where CMACMessageNumber = \"" +
-                            messageNumber + "\"" +
-                        ") - (" +
-                        "SELECT COUNT(*) " +
+        dbTemplate.query("SELECT SUM(CASE device.LocationReceived WHEN cmac_area_description.CMASGeocode THEN 1 " +
+                        "ELSE 0 END) AS ReceivedInside, " +
+                        "SUM(CASE device.LocationDisplayed WHEN cmac_area_description.CMASGeocode THEN 1 ELSE 0 END) " +
+                        "AS DisplayedInside " +
                         "FROM alert_db.device JOIN alert_db.cmac_area_description " +
-                        "WHERE device.LocationReceived = cmac_area_description.CMASGeocode " +
-                        "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
-                        ") " +
-                        "AS ReceivedOutside;",
-                new ReceivedOutsideCountMapper(result));
-
-        dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from alert_db.device where CMACMessageNumber = \"" +
-                            messageNumber + "\"" +
-                        ") - (" +
-                        "SELECT COUNT(*) " +
-                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
-                        "WHERE device.LocationDisplayed = cmac_area_description.CMASGeocode " +
-                        "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
-                        ") " +
-                        "AS DisplayedOutside;",
-                new DisplayedOutsideCountMapper(result));
-
+                        "ON device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
+                        "WHERE device.CMACMessageNumber = '" + messageNumber + "';",
+                new ReceivedDisplayedCountMapper(result));
         return ResponseEntity.ok(result);
     }
 
