@@ -68,6 +68,7 @@ const AppProvider = ({ children }) => {
   const [alertOriginator, setAlertOriginator] = useState("");
   const [login, setLogin] = useState(false);
   const [dbAlertList, setDbAlertList] = useState([]);
+  const [messagesList, setMessagesList] = useState([]);
 
   // Functions
   const getDate = () => {
@@ -78,10 +79,20 @@ const AppProvider = ({ children }) => {
     setDate(`${month} ${day}, ${year}`);
   };
 
+  /**
+   * Filters the array of messages to locate the id of the selected
+   * alert so that the modal can perform its operations.
+   *
+   * @param {int} idAlert
+   */
   const selectAlert = (idAlert) => {
     let alert;
 
-    alert = alerts.find((alert) => alert.CMAC_message_number === idAlert);
+    console.log(messagesList);
+
+    alert = messagesList.filter(
+      (alert) => alert.CMAC_message_number !== idAlert
+    );
     setSelectedAlert(alert);
     setShowModal(true);
   };
@@ -113,12 +124,13 @@ const AppProvider = ({ children }) => {
    *                        the stats for
    */
   const getMessageStats = async (msgNum) => {
-    const result = await fetch(
-      `${baseUrl}getMessageStats?messageNumber=${msgNum}`
-    );
-    const data = await result.json();
+    console.log(msgNum);
+    console.log(Number(msgNum));
 
-    return data;
+    const result = await axios(
+      `${baseUrl}getMessageStats?messageNumber=${Number(msgNum)}`
+    );
+    return result.data;
   };
 
   // useEffects
@@ -136,12 +148,23 @@ const AppProvider = ({ children }) => {
     );
   }, [alertOriginator]);
 
+  useEffect(() => {
+    if (dbAlertList.length <= 0) {
+      return;
+    }
+
+    const messages = getMessageStats(dbAlertList[0].CMAC_message_number).then(
+      (data) => setMessagesList(data)
+    );
+  }, [dbAlertList]);
+
   return (
     <AppContext.Provider
       value={{
         date,
         alerts,
         dbAlertList,
+        messagesList,
         showModal,
         selectAlert,
         selectedAlert,
