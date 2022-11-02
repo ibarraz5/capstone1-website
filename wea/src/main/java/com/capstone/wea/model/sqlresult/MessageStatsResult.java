@@ -32,6 +32,10 @@ public class MessageStatsResult {
     @JsonIgnoreProperties
     private int displayedInsideCount;
 
+    public MessageStatsResult(String messageNumber) {
+        this.messageNumber = messageNumber;
+    }
+
     /**
      * Sets the CMAC_message number for this message
      *
