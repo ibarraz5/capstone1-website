@@ -25,13 +25,9 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class WEAController {
-    private HashMap<Integer, CollectedUserData> uploads;
     @Autowired
     JdbcTemplate dbTemplate;
 
-    public WEAController() {
-        uploads = new HashMap<>();
-    }
     /**
      * Endpoint to request a WEA message from the server.
      * For now, the message is static, but if we decide to
@@ -73,18 +69,18 @@ public class WEAController {
      */
     @PutMapping(value = "/upload")
     public ResponseEntity<String> upload(@RequestBody CollectedUserData userData) {
-        URI location = ServletUriComponentsBuilder
-                .fromHttpUrl("http://localhost:8080/wea/getUpload?identifier=" + userData.getId())
-                .buildAndExpand()
-                . toUri();
-
-        uploads.put(userData.getId(), userData);
-
-        String query = "INSERT INTO alert_db.device VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL," +
-                " '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
+        String query = "INSERT INTO alert_db.device VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
+                "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
                 userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "');";
-
         dbTemplate.update(query);
+
+        query = "SELECT LAST_INSERT_ID();";
+        Integer id = dbTemplate.queryForObject(query, Integer.class);
+
+        URI location = ServletUriComponentsBuilder
+                .fromHttpUrl("http://localhost:8080/wea/getUpload?identifier=" + id)
+                .buildAndExpand()
+                .toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -102,11 +98,11 @@ public class WEAController {
      */
     @GetMapping(value = "/getUpload", produces = "application/xml")
     public ResponseEntity<CollectedUserData> getUpload(@RequestParam int identifier) {
-        CollectedUserData data = uploads.get(identifier);
+        String query = "SELECT * " +
+                "FROM alert_db.device " +
+                "WHERE device.InternalDeviceID = '" + identifier + "';";
 
-        if (data == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Upload not found");
-        }
+        CollectedUserData data = dbTemplate.queryForObject(query, new CollectedUserDataMapper());
 
         return ResponseEntity.ok(data);
     }

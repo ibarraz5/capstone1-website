@@ -7,7 +7,8 @@ This document provides an overview on how to start the server and use the API.
 Before running this application, make sure your database is up-to-date with the latest schema and has some sample 
 data to query. You can use Alex's `database_schema.sql` query to set up the database and then created your own sample 
 data, or you can use the `alert_db_setup.sql` query found this project's root directory to create both the schema 
-and populate it with sample data.
+and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of each 
+sprint and anytime you pull down changes related to this project. 
 
 ## Starting the Server
 
@@ -163,26 +164,17 @@ identifier.
 
 #### Example Request:
 
-    GET http://localhost:8080/wea/getUpload?identifier=0
+    GET http://localhost:8080/wea/getUpload?identifier=1
 
 #### Example Response Body:
 
     <CMAC_user_data>
-        <id>0</id>
         <CMAC_user_time_received>2017-06-03T01:37:50</CMAC_user_time_received>
-        <CMAC_user_time_displayed>2017-06-03T01:37:50</CMAC_user_time_displayed>
-        <CMAC_user_location_received>
-            048151
-        </CMAC_user_location_received>
-        <CMAC_user_location_displayed>
-            048151
-        </CMAC_user_location_displayed>
-        <CMAC_message_number>
-            00001056
-        </CMAC_message_number>
-        <CMAC_cap_identifier>
-            NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z
-        </CMAC_cap_identifier>
+        <CMAC_user_time_displayed>2017-06-03T01:38:01</CMAC_user_time_displayed>
+        <CMAC_user_location_received>48151</CMAC_user_location_received>
+        <CMAC_user_location_displayed>48151</CMAC_user_location_displayed>
+        <CMAC_message_number>00001055</CMAC_message_number>
+        <id>14</id>
     </CMAC_user_data>
 
 ### <a id="list" /> Get Message List by AO
