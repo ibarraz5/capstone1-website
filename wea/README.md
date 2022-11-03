@@ -2,30 +2,36 @@
 
 This document provides an overview on how to start the server and use the API.
 
+## Database Setup
+
+Before running this application, make sure your database is up-to-date with the latest schema and has some sample 
+data to query. You can use Alex's `database_schema.sql` query to set up the database and then created your own sample 
+data, or you can use the `alert_db_setup.sql` query found this project's root directory to create both the schema 
+and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of each 
+sprint and anytime you pull down changes related to this project. 
+
 ## Starting the Server
 
-This SpringBoot application can be run in your IDE as you would any other application, or by navigating to this 
-project's root directory in the terminal and using the `./gradlew bootRun` command
+Java JDK 17 is required to run this project. This SpringBoot application can be run in your IDE as you would any other 
+application, or by navigating to this project's root directory in the terminal and using the `./gradlew bootRun` 
+command in linux, or `gradle bootRun` in Windows. 
 
 ## Making API Requests
 
-The host for WEA API endpoints is always http://localhost:8080/wea
+The host for WEA API endpoints is always `http://localhost:8080/wea`. In this projects root directory, there is a 
+json file named `API_Tests.har`. This is an `HAR - HTTP Archive Format` file that can imported in either Insomnia or
+Postman to test the API endpoints.
 
-At this time. the WEA API *does not* support HTTPS.
+At this time, the WEA API *does not* support HTTPS.
 
 ## Endpoint List
 
 The WEA API has the following endpoints:
 
-[Get a Message](#message)
-
-[Upload Device Data](#upload)
-
-[Get an Upload](#getUpload)
-
-[Get Message List by AO](#list)
-
-[Get Message Stats](#stats)
+* [Get a Message](#message)
+* [Upload Device Data](#upload)
+* [Get an Upload](#getUpload)
+* [Get Message List by AO](#list)
 
 ### <a id="message" /> Get a Message
 
@@ -158,35 +164,38 @@ identifier.
 
 #### Example Request:
 
-    GET http://localhost:8080/wea/getUpload?identifier=0
+    GET http://localhost:8080/wea/getUpload?identifier=1
 
 #### Example Response Body:
 
     <CMAC_user_data>
-        <id>0</id>
         <CMAC_user_time_received>2017-06-03T01:37:50</CMAC_user_time_received>
-        <CMAC_user_time_displayed>2017-06-03T01:37:50</CMAC_user_time_displayed>
-        <CMAC_user_location_received>
-            048151
-        </CMAC_user_location_received>
-        <CMAC_user_location_displayed>
-            048151
-        </CMAC_user_location_displayed>
-        <CMAC_message_number>
-            00001056
-        </CMAC_message_number>
-        <CMAC_cap_identifier>
-            NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z
-        </CMAC_cap_identifier>
+        <CMAC_user_time_displayed>2017-06-03T01:38:01</CMAC_user_time_displayed>
+        <CMAC_user_location_received>48151</CMAC_user_location_received>
+        <CMAC_user_location_displayed>48151</CMAC_user_location_displayed>
+        <CMAC_message_number>00001055</CMAC_message_number>
+        <id>14</id>
     </CMAC_user_data>
 
 ### <a id="list" /> Get Message List by AO
 
-The **Get Message List by AO** endpoint is used to get a list of all messages in the databsae from a specified AO. 
+The **Get Message List by AO** endpoint is used to get a list of all messages in the database from a specified AO. 
 On a successful GET, the HTTP response body will contain a JSON array of JSON objects, one object for each message by
-the AO, and each object wil contain that message's unique CMAC_message_number and CMAC_sent_date_time. An AO's
-registered sender will contain the special character '@' which must be encoded as "%40" in order to successfully query
-the database.
+the AO, and each object wil contain that message's unique CMAC_message_number, CMAC_sent_date_time, and the stats 
+collected from all the devices that received the message. An AO's registered sender will contain the special character
+'@' which must be encoded as "%40" in order to successfully query the database. Each stat is defined in the 
+following table:
+
+#### Stats Definitions
+| Stat                  | Definition                                                                                                     |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|
+| averageTime           | the average time between when the message was sent and all devices received it                                 |
+| shortestTime          | the shortest time between when the message was sent and all devices received it                                |
+| longestTime           | the longest time between when the message was sent and all devices received it                                 |
+| averageDelay          | the average delay between when all devices received the message and when the alert was displayed on the device |
+| deviceCount           | the number of devices that received the message                                                                |
+| receivedOutsideCount  | the number of devices that received the message outside of the target area                                     |
+| displayedOutsideCount | the average devices for which the alert was displayed on that device outside the target area                   |
 
 #### Endpoint Usage
 | Endpoint        | HTTP Verb | Request Body | Parameters | Success Response | Response Data    |
@@ -201,49 +210,25 @@ the database.
 
     [
         {
-            "CMAC_message_number": "00001056",
-            "CMAC_sent_date_time": "2017-06-03 01:32:50"
+            "messageNumber": "00001056",
+            "date": "2017-06-03 01:32:50",
+            "averageTime": "00:05:00",
+            "shortestTime": "00:05:00",
+            "longestTime": "00:05:00",
+            "averageDelay": "00:00:36",
+            "deviceCount": 2,
+            "receivedOutsideCount": 0,
+            "displayedOutsideCount": 1
         },
         {
-            "CMAC_message_number": "00001057",
-            "CMAC_sent_date_time": "2018-09-15 08:01:22"
+            "messageNumber": "00001057",
+            "date": "2017-06-03 01:32:50",
+            "averageTime": "00:19:01",
+            "shortestTime": "00:01:00",
+            "longestTime": "00:28:22",
+            "averageDelay": "00:02:08",
+            "deviceCount": 3,
+            "receivedOutsideCount": 1,
+            "displayedOutsideCount": 0
         }
     ]
-
-### <a id="stats" /> Get Message Stats
-
-The **Get Message Stats** endpoint is used to get the collected stats about all the devices which have uploaded 
-their data to the server for a given message. On a successful GET, the HTTP response body will a JSON object that 
-contains the following stats about the specified message:
-
-| Stat                  | Definition                                                                                                |
-|-----------------------|-----------------------------------------------------------------------------------------------------------|
-| averageTime           | the average time between when the message was sent and all devices received it                            |
-| shortestTime          | the shortest time between when the message was sent and all devices received it                           |
-| longestTime           | the longest time between when the message was sent and all devices received it                            |
-| averageDelay          | the average delay between all devices received the message and when the alert was displayed on the device |
-| deviceCount           | the number of devices that received the message                                                           |
-| receivedOutsideCount  | the number of devices that received the message outside of the target area                                |
-| displayedOutsideCount | the average devices for which the alert was displayed on that device outside the target area              |
-
-
-#### Endpoint Usage
-| Endpoint         | HTTP Verb | Request Body | Parameters    | Success Response | Response Data    |
-|------------------|-----------|--------------|---------------|------------------|------------------|
-| /getMessageStats | GET       | ---          | messageNumber | 200              | application/json |
-
-#### Example Request:
-
-    GET http://localhost:8080/wea/getMessageStats?messageNumber=00001056
-
-#### Example Response Body:
-
-    {
-        "averageTime": "00:05:00",
-        "shortestTime": "00:05:00",
-        "longestTime": "00:05:00",
-        "averageDelay": "00:00:36",
-        "deviceCount": 2,
-        "receivedOutsideCount": 0,
-        "displayedOutsideCount": 1
-    }
