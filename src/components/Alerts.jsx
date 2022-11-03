@@ -14,18 +14,17 @@ const Alerts = () => {
   return (
     <section className="section-center">
       {dbAlertList.map((alert) => {
-        const { CMAC_message_number: id, CMAC_sent_date_time: dateTime } =
-          alert;
+        const { messageNumber, date } = alert;
 
         return (
-          <article key={id} className="single-alert">
+          <article key={messageNumber} className="single-alert">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="300"
               height="150"
               viewBox="0 0 300 150"
               className="img"
-              onClick={() => selectAlert(id)}
+              onClick={() => selectAlert(messageNumber)}
             >
               <rect fill="#ddd" width="300" height="150" />
               <text
@@ -42,8 +41,8 @@ const Alerts = () => {
               </text>
             </svg>
             <footer>
-              <h5>{dateTime}</h5>
-              <h5>{id}</h5>
+              <h5>{date}</h5>
+              <h5>{messageNumber}</h5>
             </footer>
           </article>
         );

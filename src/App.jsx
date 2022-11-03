@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Alerts from "./components/Alerts";
 import Modal from "./components/Modal";
-import Body from "./components/Body";
+// import Body from "./components/Body";
 import Login from "./components/Login";
 
 // I placed test text and context placeholder text for
@@ -22,7 +22,7 @@ function App() {
           {login && <Header></Header>}
           {login && <Alerts></Alerts>}
           {showModal && <Modal></Modal>}
-          {login && <Body></Body>}
+          {/* {login && <Body></Body>} */}
         </div>
         {login && <Footer></Footer>}
       </div>

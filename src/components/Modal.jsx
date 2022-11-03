@@ -4,8 +4,8 @@ const Modal = () => {
   const { selectedAlert, closeModal } = useGlobalContext();
 
   const {
-    CMAC_sent_date_time: dateTime,
-    CMAC_message_number: id,
+    date,
+    messageNumber,
     averageTime,
     shortestTime,
     longestTime,
@@ -13,14 +13,14 @@ const Modal = () => {
     deviceCount,
     receivedOutsideCount,
     displayedOutsideCount,
-  } = selectedAlert;
+  } = selectedAlert[0];
 
   return (
     <aside className="modal-overlay">
       <div className="modal-container">
         <header>
-          <h4>CMAC Alert {dateTime}</h4>
-          <h4>{id}</h4>
+          <h4>CMAC Alert {messageNumber}</h4>
+          <h4>{date}</h4>
           <button
             className="btn btn-hipster close-btn top-btn"
             onClick={closeModal}

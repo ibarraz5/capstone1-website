@@ -19,43 +19,6 @@ const monthHolder = [
 
 const baseUrl = "http://localhost:8080/wea/";
 
-// TODO: Remove this
-const alerts = [
-  {
-    CMAC_message_number: "00001056",
-    CMAC_sent_date_time: "2022-10-19 20:59:46",
-    averageTime: "00:05:00",
-    shortestTime: "00:05:00",
-    longestTime: "00:05:00",
-    averageDelay: "00:00:36",
-    deviceCount: 2,
-    receivedOutsideCount: 0,
-    displayedOutsideCount: 1,
-  },
-  {
-    CMAC_message_number: "00001057",
-    CMAC_sent_date_time: "2022-11-19 21:59:46",
-    averageTime: "00:05:00",
-    shortestTime: "00:05:00",
-    longestTime: "00:05:00",
-    averageDelay: "00:00:36",
-    deviceCount: 2,
-    receivedOutsideCount: 0,
-    displayedOutsideCount: 1,
-  },
-  {
-    CMAC_message_number: "00001058",
-    CMAC_sent_date_time: "2022-12-19 10:59:46",
-    averageTime: "00:05:00",
-    shortestTime: "00:05:00",
-    longestTime: "00:05:00",
-    averageDelay: "00:00:36",
-    deviceCount: 2,
-    receivedOutsideCount: 0,
-    displayedOutsideCount: 1,
-  },
-];
-
 const AppContext = React.createContext();
 
 // Majority of logic takes place inside of the AppProvider function
@@ -68,7 +31,6 @@ const AppProvider = ({ children }) => {
   const [alertOriginator, setAlertOriginator] = useState("");
   const [login, setLogin] = useState(false);
   const [dbAlertList, setDbAlertList] = useState([]);
-  const [messagesList, setMessagesList] = useState([]);
 
   // Functions
   const getDate = () => {
@@ -88,11 +50,15 @@ const AppProvider = ({ children }) => {
   const selectAlert = (idAlert) => {
     let alert;
 
-    console.log(messagesList);
+    console.log(idAlert);
 
-    alert = messagesList.filter(
-      (alert) => alert.CMAC_message_number !== idAlert
-    );
+    console.log("Before filter");
+    console.log(dbAlertList);
+
+    alert = dbAlertList.filter((alert) => alert.messageNumber === idAlert);
+
+    console.log("After filter");
+    console.log(alert);
     setSelectedAlert(alert);
     setShowModal(true);
   };
@@ -112,24 +78,7 @@ const AppProvider = ({ children }) => {
    */
   const getMessageList = async (ao) => {
     const result = await axios(`${baseUrl}getMessageList?sender=${ao}`);
-    return result.data;
-  };
-
-  /**
-   * Fetches the stats for all the devices that received a given message.
-   * Call this function when a card is opened to get the stats to display
-   * on that card.
-   *
-   * @param {string} msgNum The cmac_message_number of the message to get
-   *                        the stats for
-   */
-  const getMessageStats = async (msgNum) => {
-    console.log(msgNum);
-    console.log(Number(msgNum));
-
-    const result = await axios(
-      `${baseUrl}getMessageStats?messageNumber=${Number(msgNum)}`
-    );
+    // console.log(result.data);
     return result.data;
   };
 
@@ -148,23 +97,11 @@ const AppProvider = ({ children }) => {
     );
   }, [alertOriginator]);
 
-  useEffect(() => {
-    if (dbAlertList.length <= 0) {
-      return;
-    }
-
-    const messages = getMessageStats(dbAlertList[0].CMAC_message_number).then(
-      (data) => setMessagesList(data)
-    );
-  }, [dbAlertList]);
-
   return (
     <AppContext.Provider
       value={{
         date,
-        alerts,
         dbAlertList,
-        messagesList,
         showModal,
         selectAlert,
         selectedAlert,
