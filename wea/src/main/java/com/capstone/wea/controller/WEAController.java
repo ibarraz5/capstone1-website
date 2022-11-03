@@ -176,6 +176,10 @@ public class WEAController {
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
         CAPMessageModel result = CAPProcessor.parse("src/main/resources/sampleCapMessage.xml");
 
+        //TODO: store converted message in database
+        CMACMessageModel cmac = result.toCmac();
+        System.out.println(cmac); //for debug purposes
+
         return ResponseEntity.ok(result);
     }
 }
