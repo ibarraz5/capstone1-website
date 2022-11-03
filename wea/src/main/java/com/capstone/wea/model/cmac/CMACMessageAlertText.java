@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Text")
-public class WEAMessageAlertText {
+public class CMACMessageAlertText {
     @JsonProperty("CMAC_text_language")
     private String language;
     @JsonProperty("CMAC_short_text_alert_message_length")
