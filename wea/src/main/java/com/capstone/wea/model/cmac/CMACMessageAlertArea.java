@@ -28,6 +28,26 @@ public class CMACMessageAlertArea {
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<CMACMessageCapGeocode> capGeocodeList;
 
+    public void setAreaDescription(String areaDescription) {
+        this.areaDescription = areaDescription;
+    }
+
+    public void setPolygon(String polygon) {
+        this.polygon = polygon;
+    }
+
+    public void setCircle(String circle) {
+        this.circle = circle;
+    }
+
+    public void setGeocodeList(List<String> geocodeList) {
+        this.geocodeList = geocodeList;
+    }
+
+    public void setCapGeocodeList(List<CMACMessageCapGeocode> capGeocodeList) {
+        this.capGeocodeList = capGeocodeList;
+    }
+
     public String getAreaDescription() {
         return areaDescription;
     }

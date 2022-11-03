@@ -39,4 +39,36 @@ public class CMACMessageAlertInfo {
     public String getSenderName() {
         return senderName;
     }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public void setUrgency(String urgency) {
+        this.urgency = urgency;
+    }
+
+    public void setCertainty(String certainty) {
+        this.certainty = certainty;
+    }
+
+    public void setExpires(String expires) {
+        this.expires = expires;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public void setAlertAreaList(List<CMACMessageAlertArea> alertAreaList) {
+        this.alertAreaList = alertAreaList;
+    }
+
+    public void setAlertTextList(List<CMACMessageAlertText> alertTextList) {
+        this.alertTextList = alertTextList;
+    }
 }

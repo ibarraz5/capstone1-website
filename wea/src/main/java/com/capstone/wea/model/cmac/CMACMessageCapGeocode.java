@@ -11,4 +11,12 @@ public class CMACMessageCapGeocode {
     private String name;
     @JsonProperty("value")
     private String value;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

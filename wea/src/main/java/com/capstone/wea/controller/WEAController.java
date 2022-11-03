@@ -163,10 +163,23 @@ public class WEAController {
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
         CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
 
-        //TODO: store converted message in database
-        CMACMessageModel cmac = result.toCmac();
-        System.out.println(cmac); //for debug purposes
-
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint to test CAP to CmAC conversion. This endpoint
+     * converts a CAP message to CMAC and returns the CMAC
+     * message in the response body
+     *
+     * @return HTTP 200 OK and an XML CMAC message
+     */
+    @GetMapping(value = "/capToCmac", produces = "application/xml")
+    public ResponseEntity<CMACMessageModel> capToCmac() {
+        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
+
+        //TODO: next sprint?: store converted message in database
+        CMACMessageModel cmac = result.toCmac();
+
+        return ResponseEntity.ok(cmac);
     }
 }
