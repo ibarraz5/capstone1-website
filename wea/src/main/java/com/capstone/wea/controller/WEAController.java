@@ -4,10 +4,10 @@ import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
-import com.capstone.wea.processor.CAPProcessor;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import com.capstone.wea.parser.XMLParser;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RequestMapping("/wea")
@@ -38,17 +36,7 @@ public class WEAController {
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
-        CMACMessageModel model = null;
-
-        try {
-            File message = new File("src/main/resources/sampleCmacMessage.xml");
-            XmlMapper mapper = new XmlMapper();
-            mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
-            model = mapper.readValue(message, CMACMessageModel.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+        CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
 
         return ResponseEntity.ok(model);
     }
@@ -174,8 +162,35 @@ public class WEAController {
      */
     @GetMapping(value = "/parseCapMessage", produces = "application/xml")
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
-        CAPMessageModel result = CAPProcessor.parse("src/main/resources/sampleCapMessage.xml");
+        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
 
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint to test CAP to CmAC conversion. This endpoint
+     * converts a CAP message to CMAC, stores it in the database,
+     * and returns the CMAC message in the response body
+     *
+     * @return HTTP 200 OK and an XML CMAC message body if the
+     *         message was successfully added to the database,
+     *         otherwise HTTP 400 BAD REQUEST
+     */
+    @GetMapping(value = "/capToCmac", produces = "application/xml")
+    public ResponseEntity<CMACMessageModel> capToCmac() {
+        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
+
+        CMACMessageModel cmac = result.toCmac();
+
+        try {
+            if (!cmac.addToDatabase(dbTemplate)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
+            }
+        } catch (DuplicateKeyException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Key Exception: Could not add message" +
+                    " to database because a message with the same CMAC_message_number already exists");
+        }
+
+        return ResponseEntity.ok(cmac);
     }
 }

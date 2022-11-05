@@ -1,5 +1,6 @@
 package com.capstone.wea.model.cap;
 
+import com.capstone.wea.model.cmac.CMACMessageModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
@@ -27,38 +28,38 @@ public class CAPMessageModel {
     @JsonProperty("scope")
     private String scope;
     @JsonProperty("info")
-    @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CAPInfoModel> info;
+    private CAPInfoModel info;
 
-    public String getXmlns() {
-        return xmlns;
-    }
+    @JsonIgnoreProperties
+    public CMACMessageModel toCmac() {
+        CMACMessageModel cmac = new CMACMessageModel();
 
-    public String getIdentifier() {
-        return identifier;
-    }
+        /*
+         * TODO:
+         * CMAC message number must be dynamically generated because cap identifier
+         * does not follow the same convention
+         * Current plan: SELECT MAX(CMACMessageNumber) FROM alert_db.cmac_message;
+         *
+         * convert result to hex
+         * add 1
+         * convert back to string
+         *
+         * Alternatives:
+         */
+        cmac.setMessageNumber("00000000");
+        cmac.setSender(sender.toLowerCase());
+        cmac.setSentDateTime(sent);
+        cmac.setStatus(status);
+        cmac.setMessageType(msgType);
+        //TODO: Hmm.. This is the endpoint to find this specific message. Should this lead back to us or to IPAWS?
+        //if so, sendingGatewayId needs changed to match our uri as well
+        cmac.setAlertUri("");
+        //TODO: this must also be dynamically generated, but I'm not sure how yet
+        cmac.setCapIdentifier("");
+        //TODO: should this be LocalDateTime.Now()? or should cmacSentDateTime be NOW?
+        cmac.setCapSentDateTime(sent);
+        cmac.setAlertInfo(info.toCmac());
 
-    public String getSender() {
-        return sender;
-    }
-
-    public String getSent() {
-        return sent;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getMsgType() {
-        return msgType;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public List<CAPInfoModel> getInfo() {
-        return info;
+        return cmac;
     }
 }

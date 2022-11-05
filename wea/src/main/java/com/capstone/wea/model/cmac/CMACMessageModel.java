@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
@@ -87,5 +88,49 @@ public class CMACMessageModel {
 
     public void setAlertInfo(CMACMessageAlertInfo alertInfo) {
         this.alertInfo = alertInfo;
+    }
+
+    /**
+     * Adds this CMAC message to the specified database
+     *
+     * @param dbTemplate The database to which to add this
+     *                   mmessage
+     * @return True if the message was added, false if it
+     * was not
+     */
+    public boolean addToDatabase(JdbcTemplate dbTemplate) {
+        String query = "INSERT INTO alert_db.cmac_message " +
+                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" + sentDateTime + "', " +
+                "'" + messageType + "');";
+
+        //failed to insert
+        if (dbTemplate.update(query) == 0) {
+            return false;
+        }
+
+        //If another part of this message fails to insert, delete all entries for this message in all tables
+        if (!alertInfo.addToDatabse(dbTemplate, messageNumber, capIdentifier)) {
+            removeFromDatabase(dbTemplate);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void removeFromDatabase(JdbcTemplate dbTemplate) {
+        String query = "DELETE FROM alert_db.cmac_circle_coordinates " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_polygon_coordinates " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_area_description " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_alert " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_message " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
     }
 }

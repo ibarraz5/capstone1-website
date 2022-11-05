@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -38,5 +39,56 @@ public class CMACMessageAlertInfo {
 
     public String getSenderName() {
         return senderName;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public void setUrgency(String urgency) {
+        this.urgency = urgency;
+    }
+
+    public void setCertainty(String certainty) {
+        this.certainty = certainty;
+    }
+
+    public void setExpires(String expires) {
+        this.expires = expires;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public void setAlertAreaList(List<CMACMessageAlertArea> alertAreaList) {
+        this.alertAreaList = alertAreaList;
+    }
+
+    public void setAlertTextList(List<CMACMessageAlertText> alertTextList) {
+        this.alertTextList = alertTextList;
+    }
+
+    public boolean addToDatabse(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
+        String query = "INSERT INTO alert_db.cmac_alert " +
+                "VALUES ('" + senderName + "', '" + expires + "', '" + messageNumber + "', '" + capIdentifier + "');";
+
+        //failed to insert
+        if (dbTemplate.update(query) == 0) {
+            return false;
+        }
+
+        //failed to insert an area list, must delete this entry and all added alert areas
+        for (int i = 0; i < alertAreaList.size(); i++) {
+            if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
