@@ -17,7 +17,12 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.classpath
+.gradle/
+.project
+.settings/
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/bin/

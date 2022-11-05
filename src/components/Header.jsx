@@ -1,8 +1,8 @@
 import { useGlobalContext } from "../context";
 
 const Header = () => {
-  const ao = "[Current Signed In Alert Originator]";
-  const { date } = useGlobalContext();
+  const { date, alertOriginator } = useGlobalContext();
+  const ao = alertOriginator.replace("%40", "@");
 
   return (
     <header className="header-container">
