@@ -75,14 +75,13 @@ public class CMACMessageAlertArea {
         }
 
         String query;
-        
+
         for (int i = 0; i < areaNames.length; i++) {
             query = "INSERT INTO alert_db.cmac_area_description " +
                     "VALUES ('" + messageNumber + "', '" + areaNames[i] + "', '" + geocodeList.get(i) + "');";
 
             //failed to insert, remove all prior successful inserts
             if (dbTemplate.update(query) == 0) {
-                removeFromDatabase(dbTemplate, messageNumber);
                 return false;
             }
         }
@@ -107,7 +106,6 @@ public class CMACMessageAlertArea {
                     "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
-                removeFromDatabase(dbTemplate, messageNumber);
                 return false;
             }
         }
@@ -132,15 +130,10 @@ public class CMACMessageAlertArea {
                     "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
-                removeFromDatabase(dbTemplate, messageNumber);
                 return false;
             }
         }
 
         return true;
-    }
-
-    private void removeFromDatabase(JdbcTemplate dbTemplate, String messageNumber) {
-        //TODO: create DELETE query
     }
 }

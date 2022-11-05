@@ -108,7 +108,7 @@ public class CMACMessageModel {
             return false;
         }
 
-        ///alert info failed to insert, in which case the above entry must be removed
+        //If another part of this message fails to insert, delete all entries for this message in all tables
         if (!alertInfo.addToDatabse(dbTemplate, messageNumber, capIdentifier)) {
             removeFromDatabase(dbTemplate);
             return false;
@@ -118,6 +118,19 @@ public class CMACMessageModel {
     }
 
     private void removeFromDatabase(JdbcTemplate dbTemplate) {
-        //TODO: create DELETE query
+        String query = "DELETE FROM alert_db.cmac_circle_coordinates " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_polygon_coordinates " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_area_description " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_alert " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        query = "DELETE FROM alert_db.cmac_message " +
+                "WHERE CMACMessageNumber = '" + messageNumber + "';";
     }
 }

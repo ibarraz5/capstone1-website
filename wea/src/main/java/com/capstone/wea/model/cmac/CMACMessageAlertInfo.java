@@ -85,15 +85,10 @@ public class CMACMessageAlertInfo {
         //failed to insert an area list, must delete this entry and all added alert areas
         for (int i = 0; i < alertAreaList.size(); i++) {
             if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
-                removeFromDatabase(dbTemplate, messageNumber);
                 return false;
             }
         }
 
         return true;
-    }
-
-    private void removeFromDatabase(JdbcTemplate dbTemplate, String messageNumber) {
-        //TODO: create DELETE query
     }
 }
