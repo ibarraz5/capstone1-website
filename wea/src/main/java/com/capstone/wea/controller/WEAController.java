@@ -1,11 +1,13 @@
 package com.capstone.wea.controller;
 
+import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
-import com.capstone.wea.model.queryresults.*;
-import com.capstone.wea.model.queryresults.mappers.*;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import com.capstone.wea.model.sqlresult.*;
+import com.capstone.wea.model.sqlresult.mappers.*;
+import com.capstone.wea.parser.XMLParser;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,22 +15,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.File;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/wea")
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class WEAController {
-    private HashMap<Integer, CollectedUserData> uploads;
     @Autowired
     JdbcTemplate dbTemplate;
 
-    public WEAController() {
-        uploads = new HashMap<>();
-    }
     /**
      * Endpoint to request a WEA message from the server.
      * For now, the message is static, but if we decide to
@@ -38,18 +35,8 @@ public class WEAController {
      * @return HTTP 200 OK and an XML formatted WEA message
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
-    public ResponseEntity<WEAMessageModel> getMessage() {
-        WEAMessageModel model = null;
-
-        try {
-            File message = new File("src/main/resources/sampleMessage.xml");
-            XmlMapper mapper = new XmlMapper();
-            mapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
-            model = mapper.readValue(message, WEAMessageModel.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<CMACMessageModel> getMessage() {
+        CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
 
         return ResponseEntity.ok(model);
     }
@@ -70,18 +57,18 @@ public class WEAController {
      */
     @PutMapping(value = "/upload")
     public ResponseEntity<String> upload(@RequestBody CollectedUserData userData) {
-        URI location = ServletUriComponentsBuilder
-                .fromHttpUrl("http://localhost:8080/wea/getUpload?identifier=" + userData.getId())
-                .buildAndExpand()
-                . toUri();
-
-        uploads.put(userData.getId(), userData);
-
-        String query = "INSERT INTO ALERT_DB.device VALUES(\"" + userData.getMessageNumber() + "\", NULL, NULL, NULL," +
-                " \"" + userData.getLocationReceived() + "\", \"" + userData.getLocationDisplayed() + "\", \"" +
-                userData.getTimeReceived() + "\", \"" + userData.getTimeDisplayed() + "\");";
-
+        String query = "INSERT INTO alert_db.device VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
+                "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
+                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "');";
         dbTemplate.update(query);
+
+        query = "SELECT LAST_INSERT_ID();";
+        Integer id = dbTemplate.queryForObject(query, Integer.class);
+
+        URI location = ServletUriComponentsBuilder
+                .fromHttpUrl("http://localhost:8080/wea/getUpload?identifier=" + id)
+                .buildAndExpand()
+                .toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -99,113 +86,111 @@ public class WEAController {
      */
     @GetMapping(value = "/getUpload", produces = "application/xml")
     public ResponseEntity<CollectedUserData> getUpload(@RequestParam int identifier) {
-        CollectedUserData data = uploads.get(identifier);
+        String query = "SELECT * " +
+                "FROM alert_db.device " +
+                "WHERE device.InternalDeviceID = '" + identifier + "';";
 
-        if (data == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Upload not found");
-        }
+        CollectedUserData data = dbTemplate.queryForObject(query, new CollectedUserDataMapper());
 
         return ResponseEntity.ok(data);
     }
 
     /**
-     * Gets the list of all CMAC_messages sent by
-     * a specified CMAC_sender. The list contains
-     * the CMAC_message_number and the
-     * CMAC_send_date_time which will be displayed
-     * for the AO after logging onto the website
+     * Gets the list of all CMAC_messages sent by a
+     * specified CMAC_sender and the collected stats
+     * for each message.
      *
      * @param sender A CMAC_sender. '@' characters
      *               must be encoded as %40
      * @return HTTP 200 OK and a JASON array of
-     *         objects containing a
-     *         CMAC_message_number and a
-     *         CMAC_sent_date_time
+     *         objects containing each message's stats
      */
     @GetMapping("/getMessageList")
-    public ResponseEntity<List<MessageListResult>> getMessageList(@RequestParam String sender) {
-        List<MessageListResult> result = dbTemplate.query("SELECT CMACMessageNumber, CMACDateTime FROM " +
-                "ALERT_DB.cmac_message WHERE CMACSender = \"" + sender + "\";",
-                new MessageListResultMapper());
+    public ResponseEntity<List<MessageStatsResult>> getMessageList(@RequestParam String sender) {
+        List<String> numbers = dbTemplate.queryForList("SELECT CMACMessageNumber " +
+                        "FROM alert_db.cmac_message " +
+                        "WHERE CMACSender = '" + sender + "';",
+                String.class);
+
+        List<MessageStatsResult> resultList = new ArrayList<>();
+
+        for (int i = 0; i < numbers.size(); i++) {
+            resultList.add(new MessageStatsResult(numbers.get(i)));
+            mapMessageStats(numbers.get(i), resultList.get(i));
+        }
+
+        return ResponseEntity.ok(resultList);
+    }
+
+    /**
+     * Maps the stats for a CMAC message to a
+     * MessageStatsResult object
+     *
+     * @param messageNumber The CMAC_message_number
+     * @param stats The MessageStatsResult object
+     */
+    public void mapMessageStats(String messageNumber, MessageStatsResult stats) {
+        dbTemplate.query("SELECT cmac_message.CMACDateTime, SUM(CASE device.CMACMessageNumber WHEN " +
+                        "cmac_message.CMACMessageNumber THEN 1 ELSE 0 END) AS DeviceCount, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
+                        "cmac_message.CMACDateTime)))) AS TIME) AS AvgTime, " +
+                        "MAX(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS LongTime, " +
+                        "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS ShortTime, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS " +
+                        "TIME) AS AvgDelay " +
+                        "FROM alert_db.device JOIN alert_db.cmac_message " +
+                        "ON cmac_message.CMACMessageNumber = device.CMACMessageNumber " +
+                        "WHERE cmac_message.CMACMessageNumber = '" + messageNumber + "';",
+                new StatsResultsMapper(stats));
+
+        dbTemplate.query("SELECT SUM(CASE device.LocationReceived WHEN cmac_area_description.CMASGeocode THEN 1 " +
+                        "ELSE 0 END) AS ReceivedInside, " +
+                        "SUM(CASE device.LocationDisplayed WHEN cmac_area_description.CMASGeocode THEN 1 ELSE 0 END) " +
+                        "AS DisplayedInside " +
+                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
+                        "ON device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
+                        "WHERE device.CMACMessageNumber = '" + messageNumber + "';",
+                new ReceivedDisplayedCountMapper(stats));
+    }
+
+    /**
+     * Parses the sample CAP message file and returns it in an
+     * HTTP response body. This endpoint is for testing purposes
+     * only
+     *
+     * @return HTTP 200 OK and an XML CAP message
+     */
+    @GetMapping(value = "/parseCapMessage", produces = "application/xml")
+    public ResponseEntity<CAPMessageModel> parseCapMessage() {
+        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
 
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Gets the stats for a specified CMAC_Alert.
-     * The stats include: (1) the average time
-     * between when the message was sent and the
-     * devices received it, (2) the shortest time
-     * from all devices in (1), (3) the longest
-     * time from all devices in (1), (4) the
-     * average delay between when the devices
-     * received the message and when it was
-     * displayed on the device, (5) the number
-     * of devices that received the message, and
-     * (6) the number of devices that received the
-     * message that were outside the targeted area
+     * Endpoint to test CAP to CmAC conversion. This endpoint
+     * converts a CAP message to CMAC, stores it in the database,
+     * and returns the CMAC message in the response body
      *
-     * @param messageNumber The cmac_message_number
-     *                      for which to get the
-     *                      stats
-     * @return HTTP 200 OK and a JSON object
-     *         containing the stats
+     * @return HTTP 200 OK and an XML CMAC message body if the
+     *         message was successfully added to the database,
+     *         otherwise HTTP 400 BAD REQUEST
      */
-    @GetMapping("/getMessageStats")
-    public ResponseEntity<MessageStatsResult> getMessageStats(@RequestParam String messageNumber) {
-        //TODO: query DB to make sure message exists?
-        MessageStatsResult result = new MessageStatsResult();
+    @GetMapping(value = "/capToCmac", produces = "application/xml")
+    public ResponseEntity<CMACMessageModel> capToCmac() {
+        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
 
-        dbTemplate.query("SELECT COUNT(*) AS DeviceCount FROM ALERT_DB.device WHERE CMACMessageNumber = " +
-                        "\"" + messageNumber + "\";",
-                new DeviceCountMapper(result));
+        CMACMessageModel cmac = result.toCmac();
 
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                        "cmac_message.CMACDateTime)))) AS TIME) as AvgTime FROM ALERT_DB.device INNER JOIN " +
-                        "ALERT_DB.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new AverageTimeMapper(result));
+        try {
+            if (!cmac.addToDatabase(dbTemplate)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
+            }
+        } catch (DuplicateKeyException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Key Exception: Could not add message" +
+                    " to database because a message with the same CMAC_message_number already exists");
+        }
 
-        dbTemplate.query("SELECT MIN(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                    "cmac_message.CMACDateTime)) as ShortTime FROM ALERT_DB.device JOIN ALERT_DB.cmac_message " +
-                    "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new ShortestTimeMapper(result));
-
-        dbTemplate.query("SELECT MAX(TIMEDIFF(CAST(device.TimeReceived as DATETIME), " +
-                        "cmac_message.CMACDateTime)) as LongTime FROM ALERT_DB.device JOIN ALERT_DB.cmac_message " +
-                        "WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new LongestTimeMapper(result));
-
-        dbTemplate.query("SELECT CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(CAST(device.TimeDisplayed as DATETIME), " +
-                        "CAST(device.TimeReceived as DATETIME))))) AS TIME) as AvgDelay FROM ALERT_DB.device JOIN " +
-                        "ALERT_DB.cmac_message WHERE cmac_message.CMACMessageNumber = \"" + messageNumber + "\";",
-                new AverageDelayMapper(result));
-
-        dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from ALERT_DB.device where CMACMessageNumber = \"" +
-                            messageNumber + "\"" +
-                        ") - (" +
-                        "SELECT COUNT(*) " +
-                        "FROM ALERT_DB.device JOIN ALERT_DB.cmac_area_description " +
-                        "WHERE device.LocationReceived = CAST(cmac_area_description.CMASGeocode AS CHAR) " +
-                        "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
-                        ") " +
-                        "AS ReceivedOutside;",
-                new ReceivedOutsideCountMapper(result));
-
-        dbTemplate.query("SELECT (" +
-                        "SELECT count(*) AS DeviceCount from ALERT_DB.device where CMACMessageNumber = \"" +
-                            messageNumber + "\"" +
-                        ") - (" +
-                        "SELECT COUNT(*) " +
-                        "FROM ALERT_DB.device JOIN ALERT_DB.cmac_area_description " +
-                        "WHERE device.LocationDisplayed = CAST(cmac_area_description.CMASGeocode AS CHAR) " +
-                        "AND device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "AND device.CMACMessageNumber = \"" + messageNumber + "\"" +
-                        ") " +
-                        "AS DisplayedOutside;",
-                new DisplayedOutsideCountMapper(result));
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(cmac);
     }
 }
