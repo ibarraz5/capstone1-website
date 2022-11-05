@@ -73,7 +73,7 @@ public class CAPInfoModel {
          *
          * Without real messages/and up-to-date schema, CAP
          * to CMAC conversion cannot truly be compleated
-         * (mush to the dismay of the Phrexians)
+         * (mush to the dismay of the Phyrexians)
          */
         List<CMACMessageAlertText> cmacText = new ArrayList<>();
 
