@@ -24,17 +24,25 @@ public class CAPAreaModel {
     public CMACMessageAlertArea toCmac() {
         CMACMessageAlertArea cmac = new CMACMessageAlertArea();
 
-        cmac.setAreaDescription(areaDesc.replace(", ", ";"));
+        cmac.setAreaDescription(areaDesc.replace(",", ";"));
         cmac.setPolygon(polygon);
         cmac.setCircle("");
 
-        List <CMACMessageCapGeocode> cmacGeocode = new ArrayList<>();
+        List<CMACMessageCapGeocode> cmacGeocode = new ArrayList<>();
 
         for (CAPGeocodeModel cap : geocode) {
             cmacGeocode.add(cap.toCmac());
         }
 
         cmac.setCapGeocodeList(cmacGeocode);
+
+        List<String> geocodeList = new ArrayList<>();
+
+        for (CAPGeocodeModel cap: geocode) {
+            geocodeList.add(cap.getValue());
+        }
+
+        cmac.setGeocodeList(geocodeList);
 
         return cmac;
     }

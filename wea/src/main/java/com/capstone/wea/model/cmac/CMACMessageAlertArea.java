@@ -75,6 +75,7 @@ public class CMACMessageAlertArea {
         }
 
         String query;
+        
         for (int i = 0; i < areaNames.length; i++) {
             query = "INSERT INTO alert_db.cmac_area_description " +
                     "VALUES ('" + messageNumber + "', '" + areaNames[i] + "', '" + geocodeList.get(i) + "');";
@@ -86,7 +87,13 @@ public class CMACMessageAlertArea {
             }
         }
 
-        String[] polyCoordinates = polygon.split(" ");
+        String[] polyCoordinates;
+
+        if (polygon.isEmpty()) {
+            polyCoordinates = new String[] {};
+        } else {
+            polyCoordinates = polygon.split(" ");
+        }
 
         for (int i = 0; i < polyCoordinates.length; i++) {
             BigDecimal[] decCoordinates = new BigDecimal[2];
@@ -97,7 +104,7 @@ public class CMACMessageAlertArea {
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
             query = "INSERT INTO alert_db.cmac_polygon_coordinates " +
-                    "VALUES ('" + messageNumber + ", " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 removeFromDatabase(dbTemplate, messageNumber);
@@ -105,7 +112,13 @@ public class CMACMessageAlertArea {
             }
         }
 
-        String[] circCoordinates = polygon.split(" ");
+        String[] circCoordinates;
+
+        if (circle.isEmpty()) {
+            circCoordinates = new String[] {};
+        } else {
+            circCoordinates = circle.split(" ");
+        }
 
         for (int i = 0; i < circCoordinates.length; i++) {
             BigDecimal[] decCoordinates = new BigDecimal[2];
@@ -115,8 +128,8 @@ public class CMACMessageAlertArea {
             decCoordinates[0] = new BigDecimal(coordinates[0]);
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
-            query = "INSERT INTO alert_db.cmac_polygon_coordinates " +
-                    "VALUES ('" + messageNumber + ", " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+            query = "INSERT INTO alert_db.cmac_circle_coordinates " +
+                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 removeFromDatabase(dbTemplate, messageNumber);

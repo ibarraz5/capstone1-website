@@ -13,6 +13,10 @@ public class CAPGeocodeModel {
     @JsonProperty("value")
     private String value;
 
+    public String getValue() {
+        return value;
+    }
+
     public CMACMessageCapGeocode toCmac() {
         CMACMessageCapGeocode cmac = new CMACMessageCapGeocode();
 
