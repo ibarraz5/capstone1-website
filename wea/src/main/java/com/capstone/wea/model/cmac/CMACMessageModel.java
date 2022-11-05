@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
@@ -87,5 +88,36 @@ public class CMACMessageModel {
 
     public void setAlertInfo(CMACMessageAlertInfo alertInfo) {
         this.alertInfo = alertInfo;
+    }
+
+    /**
+     * Adds this CMAC message to the specified database
+     *
+     * @param dbTemplate The database to which to add this
+     *                   mmessage
+     * @return True if the message was added, false if it
+     * was not
+     */
+    public boolean addToDatabase(JdbcTemplate dbTemplate) {
+        String query = "INSERT INTO alert_db.cmac_message " +
+                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" + sentDateTime + "', " +
+                "'" + messageType + "');";
+
+        //failed to insert
+        if (dbTemplate.update(query) == 0) {
+            return false;
+        }
+
+        ///alert info failed to insert, in which case the above entry must be removed
+        if (!alertInfo.addToDatabse(dbTemplate, messageNumber, capIdentifier)) {
+            removeFromDatabase(dbTemplate);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void removeFromDatabase(JdbcTemplate dbTemplate) {
+        //TODO: create DELETE query
     }
 }

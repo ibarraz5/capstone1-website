@@ -43,18 +43,20 @@ public class CAPMessageModel {
          * convert result to hex
          * add 1
          * convert back to string
+         *
+         * Alternatives:
          */
-        cmac.setMessageNumber("");
+        cmac.setMessageNumber("00000000");
         cmac.setSender(sender.toLowerCase());
         cmac.setSentDateTime(sent);
         cmac.setStatus(status);
         cmac.setMessageType(msgType);
-        //TODO: Hmm.. This is the endpoint to find this specific message. Should this lead back to us?
-        //if so, sendingGatewayId needs changed to match out uri as well
+        //TODO: Hmm.. This is the endpoint to find this specific message. Should this lead back to us or to IPAWS?
+        //if so, sendingGatewayId needs changed to match our uri as well
         cmac.setAlertUri("");
-        //TODO: this must also be dynamically generated
+        //TODO: this must also be dynamically generated, but I'm not sure how yet
         cmac.setCapIdentifier("");
-        //TODO: should this be LocalDateTime.Now()?
+        //TODO: should this be LocalDateTime.Now()? or should cmacSentDateTime be NOW?
         cmac.setCapSentDateTime(sent);
         cmac.setAlertInfo(info.toCmac());
 

@@ -8,9 +8,11 @@ import com.capstone.wea.parser.XMLParser;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
@@ -168,17 +170,22 @@ public class WEAController {
 
     /**
      * Endpoint to test CAP to CmAC conversion. This endpoint
-     * converts a CAP message to CMAC and returns the CMAC
-     * message in the response body
+     * converts a CAP message to CMAC, stores it in the database,
+     * and returns the CMAC message in the response body
      *
-     * @return HTTP 200 OK and an XML CMAC message
+     * @return HTTP 200 OK and an XML CMAC message body if the
+     *         message was successfully added to the database,
+     *         otherwise HTTP 400 BAD REQUEST
      */
     @GetMapping(value = "/capToCmac", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> capToCmac() {
         CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
 
-        //TODO: next sprint?: store converted message in database
         CMACMessageModel cmac = result.toCmac();
+
+        if (!cmac.addToDatabase(dbTemplate)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
+        }
 
         return ResponseEntity.ok(cmac);
     }

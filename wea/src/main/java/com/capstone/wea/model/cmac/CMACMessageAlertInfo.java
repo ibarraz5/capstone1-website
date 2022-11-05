@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -70,5 +71,29 @@ public class CMACMessageAlertInfo {
 
     public void setAlertTextList(List<CMACMessageAlertText> alertTextList) {
         this.alertTextList = alertTextList;
+    }
+
+    public boolean addToDatabse(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
+        String query = "INSERT INTO alert_db.cmac_alert " +
+                "VALUES ('" + senderName + "', '" + expires + "', '" + messageNumber + "', '" + capIdentifier + "');";
+
+        //failed to insert
+        if (dbTemplate.update(query) == 0) {
+            return false;
+        }
+
+        //failed to insert an area list, must delete this entry and all added alert areas
+        for (int i = 0; i < alertAreaList.size(); i++) {
+            if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
+                removeFromDatabase(dbTemplate, messageNumber);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void removeFromDatabase(JdbcTemplate dbTemplate, String messageNumber) {
+        //TODO: create DELETE query
     }
 }
