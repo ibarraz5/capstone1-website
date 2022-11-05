@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
 
     if (user) {
-      setAlertOriginator(user);
+      setAlertOriginator(user.replace("@", "%40"));
       setLogin(true);
     }
   };
