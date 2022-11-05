@@ -5,9 +5,9 @@ import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
 import com.capstone.wea.parser.XMLParser;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,8 +182,13 @@ public class WEAController {
 
         CMACMessageModel cmac = result.toCmac();
 
-        if (!cmac.addToDatabase(dbTemplate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
+        try {
+            if (!cmac.addToDatabase(dbTemplate)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
+            }
+        } catch (DuplicateKeyException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Key Exception: Could not add message" +
+                    " to database because a message with the same CMAC_message_number already exists");
         }
 
         return ResponseEntity.ok(cmac);
