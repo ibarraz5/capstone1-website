@@ -121,16 +121,26 @@ public class CMACMessageModel {
         String query = "DELETE FROM alert_db.cmac_circle_coordinates " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
 
+        dbTemplate.update(query);
+
         query = "DELETE FROM alert_db.cmac_polygon_coordinates " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_area_description " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
 
+        dbTemplate.update(query);
+
         query = "DELETE FROM alert_db.cmac_alert " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
 
+        dbTemplate.update(query);
+
         query = "DELETE FROM alert_db.cmac_message " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
+
+        dbTemplate.update(query);
     }
 }
