@@ -1,6 +1,5 @@
 package com.capstone.wea.controller;
 
-import com.capstone.wea.model.cap.CAPMessageModel;
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
@@ -152,45 +151,3 @@ public class WEAController {
                         "WHERE device.CMACMessageNumber = '" + messageNumber + "';",
                 new ReceivedDisplayedCountMapper(stats));
     }
-
-    /**
-     * Parses the sample CAP message file and returns it in an
-     * HTTP response body. This endpoint is for testing purposes
-     * only
-     *
-     * @return HTTP 200 OK and an XML CAP message
-     */
-    @GetMapping(value = "/parseCapMessage", produces = "application/xml")
-    public ResponseEntity<CAPMessageModel> parseCapMessage() {
-        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
-
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * Endpoint to test CAP to CmAC conversion. This endpoint
-     * converts a CAP message to CMAC, stores it in the database,
-     * and returns the CMAC message in the response body
-     *
-     * @return HTTP 200 OK and an XML CMAC message body if the
-     *         message was successfully added to the database,
-     *         otherwise HTTP 400 BAD REQUEST
-     */
-    @GetMapping(value = "/capToCmac", produces = "application/xml")
-    public ResponseEntity<CMACMessageModel> capToCmac() {
-        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
-
-        CMACMessageModel cmac = result.toCmac();
-
-        try {
-            if (!cmac.addToDatabase(dbTemplate)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to add message to database");
-            }
-        } catch (DuplicateKeyException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Key Exception: Could not add message" +
-                    " to database because a message with the same CMAC_message_number already exists");
-        }
-
-        return ResponseEntity.ok(cmac);
-    }
-}
