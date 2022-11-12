@@ -88,7 +88,7 @@ public class WEAController {
     public ResponseEntity<CollectedUserData> getUpload(@RequestParam int identifier) {
         String query = "SELECT * " +
                 "FROM alert_db.device " +
-                "WHERE device.InternalDeviceID = '" + identifier + "';";
+                "WHERE device_upload_data.InternalDeviceID = '" + identifier + "';";
 
         CollectedUserData data = dbTemplate.queryForObject(query, new CollectedUserDataMapper());
 
@@ -130,27 +130,23 @@ public class WEAController {
      * @param stats The MessageStatsResult object
      */
     public void mapMessageStats(String messageNumber, MessageStatsResult stats) {
-        dbTemplate.query("SELECT cmac_message.CMACDateTime, SUM(CASE device.CMACMessageNumber WHEN " +
-                        "cmac_message.CMACMessageNumber THEN 1 ELSE 0 END) AS DeviceCount, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
-                        "cmac_message.CMACDateTime)))) AS TIME) AS AvgTime, " +
-                        "MAX(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS LongTime, " +
-                        "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS ShortTime, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS " +
-                        "TIME) AS AvgDelay " +
-                        "FROM alert_db.device JOIN alert_db.cmac_message " +
-                        "ON cmac_message.CMACMessageNumber = device.CMACMessageNumber " +
+        dbTemplate.query("SELECT cmac_message.CMACDateTime, CMACMessageType, " +
+                        "SUM(CASE device_upload_data.CMACMessageNumber WHEN cmac_message.CMACMessageNumber " +
+                        "THEN 1 ELSE 0 END) AS DeviceCount, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) " +
+                        "AS AvgTime, " +
+                        "MAX(TIMEDIFF(TimeReceived, CMACDateTime)) AS LongTime, " +
+                        "MIN(TIMEDIFF(TimeReceived, CMACDateTime)) AS ShortTime, " +
+                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeDisplayed, TimeReceived)))) AS TIME) " +
+                        "AS AvgDelay, " +
+                        "SUM(CASE WHEN ReceivedOutsideArea = 1 THEN 1 ELSE 0 END) AS ReceivedOutsideCount, " +
+                        "SUM(CASE WHEN DisplayedOutsideArea = 1 THEN 1 ELSE 0 END) AS DisplayedOutsideCount, " +
+                        "SUM(CASE WHEN ReceivedAfterExpired = 1 THEN 1 ELSE 0 END) AS ReceivedExpiredCount, " +
+                        "SUM(CASE WHEN DisplayedAfterExpired = 1 THEN 1 ELSE 0 END) AS DisplayedExpiredCount " +
+                        "FROM alert_db.device_upload_data JOIN alert_db.cmac_message " +
+                        "ON cmac_message.CMACMessageNumber = device_upload_data.CMACMessageNumber " +
                         "WHERE cmac_message.CMACMessageNumber = '" + messageNumber + "';",
                 new StatsResultsMapper(stats));
-
-        dbTemplate.query("SELECT SUM(CASE device.LocationReceived WHEN cmac_area_description.CMASGeocode THEN 1 " +
-                        "ELSE 0 END) AS ReceivedInside, " +
-                        "SUM(CASE device.LocationDisplayed WHEN cmac_area_description.CMASGeocode THEN 1 ELSE 0 END) " +
-                        "AS DisplayedInside " +
-                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
-                        "ON device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "WHERE device.CMACMessageNumber = '" + messageNumber + "';",
-                new ReceivedDisplayedCountMapper(stats));
     }
 
     /**
