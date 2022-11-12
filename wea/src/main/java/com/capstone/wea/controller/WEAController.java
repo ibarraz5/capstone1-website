@@ -56,12 +56,15 @@ public class WEAController {
      *         uploaded data
      */
     @PutMapping(value = "/upload")
-    public ResponseEntity<String> upload(@RequestBody CollectedUserData userData) {
-        String query = "INSERT INTO alert_db.device VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
+    public ResponseEntity<String> upload(@RequestBody CollectedDeviceData userData) {
+        String query = "INSERT INTO alert_db.device_upload_data VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
                 "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
-                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "');";
+                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "', " +
+                userData.isReceivedOutsideArea() + ", " + userData.isDisplayedOutsideArea() + ", " +
+                userData.isReceivedAfterExpired() + ", " + userData.isDisplayedAfterExpired() + ");";
         dbTemplate.update(query);
 
+        //gets the UploadID of the most recently inserted row
         query = "SELECT LAST_INSERT_ID();";
         Integer id = dbTemplate.queryForObject(query, Integer.class);
 
@@ -85,12 +88,12 @@ public class WEAController {
      *         FOUND if the identifier is invalid
      */
     @GetMapping(value = "/getUpload", produces = "application/xml")
-    public ResponseEntity<CollectedUserData> getUpload(@RequestParam int identifier) {
+    public ResponseEntity<CollectedDeviceData> getUpload(@RequestParam int identifier) {
         String query = "SELECT * " +
-                "FROM alert_db.device " +
-                "WHERE device_upload_data.InternalDeviceID = '" + identifier + "';";
+                "FROM alert_db.device_upload_data " +
+                "WHERE device_upload_data.UploadID = '" + identifier + "';";
 
-        CollectedUserData data = dbTemplate.queryForObject(query, new CollectedUserDataMapper());
+        CollectedDeviceData data = dbTemplate.queryForObject(query, new CollectedDeviceDataMapper());
 
         return ResponseEntity.ok(data);
     }

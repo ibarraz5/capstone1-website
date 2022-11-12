@@ -1,13 +1,11 @@
 package com.capstone.wea.model.cmac;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-@JacksonXmlRootElement(localName = "CMAC_user_data")
-public class CollectedUserData {
+@JacksonXmlRootElement(localName = "CMAC_device_data")
+public class CollectedDeviceData {
     @JsonProperty("CMAC_user_time_received")
     private LocalDateTime timeReceived;
     @JsonProperty("CMAC_user_time_displayed")
@@ -18,15 +16,27 @@ public class CollectedUserData {
     private String locationDisplayed;
     @JsonProperty("CMAC_message_number")
     private String messageNumber;
+
+    @JsonProperty("Received_Outside_Area")
+    private boolean receivedOutsideArea;
+
+    @JsonProperty("Displayed_Outside_Area")
+    private boolean displayedOutsideArea;
+
+    @JsonProperty("Received_After_Expired")
+    private boolean receivedAfterExpired;
+
+    @JsonProperty("Displayed_After_Expired")
+    private boolean displayedAfterExpired;
     @JsonProperty("id")
-    private int id;
+    private int uploadId;
 
     /**
      * Gets the unique ID of this collected data in the database
      * @return The unique identifier for this data
      */
-    public int getId() {
-        return id;
+    public int getUploadId() {
+        return uploadId;
     }
 
     public LocalDateTime getTimeReceived() {
@@ -47,6 +57,22 @@ public class CollectedUserData {
 
     public String getMessageNumber() {
         return messageNumber;
+    }
+
+    public boolean isReceivedOutsideArea() {
+        return receivedOutsideArea;
+    }
+
+    public boolean isDisplayedOutsideArea() {
+        return displayedOutsideArea;
+    }
+
+    public boolean isReceivedAfterExpired() {
+        return receivedAfterExpired;
+    }
+
+    public boolean isDisplayedAfterExpired() {
+        return displayedAfterExpired;
     }
 
     /**
@@ -98,11 +124,27 @@ public class CollectedUserData {
     }
 
     /**
-     * Sets the unique idetifier for this data in the database
+     * Sets the unique upload identifier for this data in the database
      *
-     * @param id This data's ID
+     * @param uploadId This data's upload ID
      */
-    public void setId(int id) {
-        this.id = id;
+    public void setUploadId(int uploadId) {
+        this.uploadId = uploadId;
+    }
+
+    public void setReceivedOutsideArea(boolean receivedOutsideArea) {
+        this.receivedOutsideArea = receivedOutsideArea;
+    }
+
+    public void setDisplayedOutsideArea(boolean displayedOutsideArea) {
+        this.displayedOutsideArea = displayedOutsideArea;
+    }
+
+    public void setReceivedAfterExpired(boolean receivedAfterExpired) {
+        this.receivedAfterExpired = receivedAfterExpired;
+    }
+
+    public void setDisplayedAfterExpired(boolean displayedAfterExpired) {
+        this.displayedAfterExpired = displayedAfterExpired;
     }
 }
