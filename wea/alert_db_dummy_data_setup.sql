@@ -157,7 +157,7 @@ DROP TABLE IF EXISTS `device`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `device` (
   `CMACMessageNumber` varchar(16) NOT NULL,
-  `InternalDeviceID` int NOT NULL AUTO_INCREMENT,
+  `DeviceID` int NOT NULL AUTO_INCREMENT,
   `DeviceOS` varchar(180) DEFAULT NULL,
   `DeviceOSVersion` varchar(180) DEFAULT NULL,
   `DeviceModel` varchar(180) DEFAULT NULL,
@@ -165,6 +165,11 @@ CREATE TABLE `device` (
   `LocationDisplayed` int DEFAULT NULL,
   `TimeReceived` datetime DEFAULT NULL,
   `TimeDisplayed` datetime DEFAULT NULL,
+  `ReceivedOutsideArea` boolean,
+  `DisplayedOutsideArea` boolean,
+  `ReceivedAfterExpired` boolean,
+  `DisplayedAfterExpired` boolean,
+
   PRIMARY KEY (`InternalDeviceID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
