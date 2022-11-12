@@ -7,9 +7,14 @@ This document provides an overview on how to start the server and use the API.
 Before running this application, make sure your database is up-to-date with the latest schema and has some sample 
 data to query. You can use Alex's `database_schema.sql` query to set up the database and then created your own sample 
 data, or you can use the `alert_db_dummy_data_setup.sql` query found this project's root directory to create both the 
-schema  and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of
-each sprint and anytime you pull down the latest changes related to the server to make sure your local database works
-as intended.
+schema and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of each
+sprint and anytime you pull down the latest changes related to the server to make sure your local database works as
+intended.
+
+If you are making changes to the database schema, **DO NOT** directly modify the `alert_db_dummy_data_setup.sql` file. 
+These changes should be made in the `database_schema.sql`. The `alert_db_dummy_data.sql` file is an export created by
+MySQL and any changes made will be overwritten if a new export is produced. It may also fail to execute because it can 
+make the insert statement s invalid.
 
 ## Starting the Server
 

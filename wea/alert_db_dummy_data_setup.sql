@@ -18,33 +18,6 @@ USE `alert_db`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `cmac_alert`
---
-
-DROP TABLE IF EXISTS `cmac_alert`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `cmac_alert` (
-  `CMACSenderName` varchar(180) NOT NULL,
-  `CMACExpiresDateTime` datetime NOT NULL,
-  `CMACMessageNumber` varchar(16) NOT NULL,
-  `CMACCapIdentifier` varchar(180) NOT NULL,
-  KEY `FK_CMACMessageNumber1` (`CMACMessageNumber`),
-  CONSTRAINT `FK_CMACMessageNumber1` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cmac_alert`
---
-
-LOCK TABLES `cmac_alert` WRITE;
-/*!40000 ALTER TABLE `cmac_alert` DISABLE KEYS */;
-INSERT INTO `cmac_alert` VALUES ('NWS San Angelo TX','2017-06-03 02:30:00','00001056','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z'),('NWS San Angelo TX','2017-06-03 02:30:00','00001057','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z'),('NWS San Angelo TX','2022-10-19 21:48:38','00001058','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z'),('NWS San Angelo TX','2017-06-03 02:30:00','00001059','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z');
-/*!40000 ALTER TABLE `cmac_alert` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `cmac_area_description`
 --
 
@@ -55,8 +28,8 @@ CREATE TABLE `cmac_area_description` (
   `CMACMessageNumber` varchar(16) NOT NULL,
   `AreaName` varchar(30) NOT NULL,
   `CMASGeocode` int NOT NULL,
-  KEY `FK_CMACMessageNumber5` (`CMACMessageNumber`),
-  CONSTRAINT `FK_CMACMessageNumber5` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
+  KEY `CMACMessageNumber` (`CMACMessageNumber`),
+  CONSTRAINT `cmac_area_description_ibfk_1` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -81,8 +54,8 @@ CREATE TABLE `cmac_circle_coordinates` (
   `CMACMessageNumber` varchar(16) NOT NULL,
   `Latitude` decimal(5,2) NOT NULL,
   `Longitude` decimal(5,2) NOT NULL,
-  KEY `FK_CMACMessageNumber4` (`CMACMessageNumber`),
-  CONSTRAINT `FK_CMACMessageNumber4` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
+  KEY `CMACMessageNumber` (`CMACMessageNumber`),
+  CONSTRAINT `cmac_circle_coordinates_ibfk_1` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -108,6 +81,8 @@ CREATE TABLE `cmac_message` (
   `CMACSender` varchar(180) NOT NULL,
   `CMACDateTime` datetime NOT NULL,
   `CMACMessageType` varchar(165) NOT NULL,
+  `CMACSenderName` varchar(180) NOT NULL,
+  `CMACExpiresDateTime` datetime NOT NULL,
   PRIMARY KEY (`CMACMessageNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -118,7 +93,7 @@ CREATE TABLE `cmac_message` (
 
 LOCK TABLES `cmac_message` WRITE;
 /*!40000 ALTER TABLE `cmac_message` DISABLE KEYS */;
-INSERT INTO `cmac_message` VALUES ('00001056','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert'),('00001057','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert'),('00001058','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert'),('00001059','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert');
+INSERT INTO `cmac_message` VALUES ('00001056','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert','NWS San Angelo TX','2017-06-03 02:30:00'),('00001057','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert','NWS San Angelo TX','2017-06-03 02:30:00'),('00001058','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert','NWS San Angelo TX','2017-06-03 02:30:00'),('00001059','NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z','w-nws.webmaster@noaa.gov','2017-06-03 01:32:50','Alert','NWS San Angelo TX','2017-06-03 02:30:00');
 /*!40000 ALTER TABLE `cmac_message` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -133,8 +108,8 @@ CREATE TABLE `cmac_polygon_coordinates` (
   `CMACMessageNumber` varchar(16) NOT NULL,
   `Latitude` decimal(5,2) NOT NULL,
   `Longitude` decimal(5,2) NOT NULL,
-  KEY `FK_CMACMessageNumber3` (`CMACMessageNumber`),
-  CONSTRAINT `FK_CMACMessageNumber3` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
+  KEY `CMACMessageNumber` (`CMACMessageNumber`),
+  CONSTRAINT `cmac_polygon_coordinates_ibfk_1` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -149,15 +124,15 @@ INSERT INTO `cmac_polygon_coordinates` VALUES ('00001056',32.21,-99.62),('000010
 UNLOCK TABLES;
 
 --
--- Table structure for table `device`
+-- Table structure for table `device_upload_data`
 --
 
-DROP TABLE IF EXISTS `device`;
+DROP TABLE IF EXISTS `device_upload_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `device` (
+CREATE TABLE `device_upload_data` (
   `CMACMessageNumber` varchar(16) NOT NULL,
-  `DeviceID` int NOT NULL AUTO_INCREMENT,
+  `UploadID` int NOT NULL AUTO_INCREMENT,
   `DeviceOS` varchar(180) DEFAULT NULL,
   `DeviceOSVersion` varchar(180) DEFAULT NULL,
   `DeviceModel` varchar(180) DEFAULT NULL,
@@ -165,23 +140,24 @@ CREATE TABLE `device` (
   `LocationDisplayed` int DEFAULT NULL,
   `TimeReceived` datetime DEFAULT NULL,
   `TimeDisplayed` datetime DEFAULT NULL,
-  `ReceivedOutsideArea` boolean,
-  `DisplayedOutsideArea` boolean,
-  `ReceivedAfterExpired` boolean,
-  `DisplayedAfterExpired` boolean,
-
-  PRIMARY KEY (`InternalDeviceID`)
+  `ReceivedOutsideArea` bit(1) DEFAULT b'0',
+  `DisplayedOutsideArea` bit(1) DEFAULT b'0',
+  `ReceivedAfterExpired` bit(1) DEFAULT b'0',
+  `DisplayedAfterExpired` bit(1) DEFAULT b'0',
+  PRIMARY KEY (`UploadID`),
+  KEY `CMACMessageNumber` (`CMACMessageNumber`),
+  CONSTRAINT `device_upload_data_ibfk_1` FOREIGN KEY (`CMACMessageNumber`) REFERENCES `cmac_message` (`CMACMessageNumber`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `device`
+-- Dumping data for table `device_upload_data`
 --
 
-LOCK TABLES `device` WRITE;
-/*!40000 ALTER TABLE `device` DISABLE KEYS */;
-INSERT INTO `device` VALUES ('00001056',1,NULL,NULL,NULL,48151,48151,'2017-06-03 01:41:47','2017-06-03 01:42:14'),('00001056',2,NULL,NULL,NULL,48151,48152,'2017-06-03 01:37:50','2017-06-03 01:38:21'),('00001057',3,NULL,NULL,NULL,48441,48441,'2017-06-03 01:33:50','2017-06-03 01:36:01'),('00001057',4,NULL,NULL,NULL,48253,48253,'2017-06-03 02:01:12','2017-06-03 02:01:59'),('00001057',5,NULL,NULL,NULL,48254,48253,'2017-06-03 02:00:32','2017-06-03 02:03:59'),('00001058',6,NULL,NULL,NULL,48441,48441,'2017-06-03 01:36:24','2017-06-03 01:38:01'),('00001058',7,NULL,NULL,NULL,48059,48441,'2017-06-03 01:34:10','2017-06-03 01:34:12'),('00001058',8,NULL,NULL,NULL,48059,48059,'2017-06-03 02:01:01','2017-06-03 02:01:59'),('00001058',9,NULL,NULL,NULL,48060,48060,'2017-06-03 01:45:16','2017-06-03 01:47:09'),('00001059',10,NULL,NULL,NULL,48151,48441,'2017-06-03 01:33:01','2017-06-03 01:33:14'),('00001059',11,NULL,NULL,NULL,48441,48151,'2017-06-03 01:33:18','2017-06-03 01:33:22'),('00001059',12,NULL,NULL,NULL,48253,48253,'2017-06-03 01:33:29','2017-06-03 01:33:36');
-/*!40000 ALTER TABLE `device` ENABLE KEYS */;
+LOCK TABLES `device_upload_data` WRITE;
+/*!40000 ALTER TABLE `device_upload_data` DISABLE KEYS */;
+INSERT INTO `device_upload_data` VALUES ('00001056',1,NULL,NULL,NULL,48151,48151,'2017-06-03 01:41:47','2017-06-03 01:42:14',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001056',2,NULL,NULL,NULL,48151,48152,'2017-06-03 01:37:50','2017-06-03 01:38:21',_binary '\0',_binary '',_binary '\0',_binary '\0'),('00001057',3,NULL,NULL,NULL,48441,48441,'2017-06-03 01:33:50','2017-06-03 01:36:01',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001057',4,NULL,NULL,NULL,48253,48253,'2017-06-03 02:01:12','2017-06-03 02:01:59',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001057',5,NULL,NULL,NULL,48254,48253,'2017-06-03 02:00:32','2017-06-03 02:03:59',_binary '',_binary '\0',_binary '\0',_binary '\0'),('00001058',6,NULL,NULL,NULL,48441,48441,'2017-06-03 01:36:24','2017-06-03 01:38:01',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001058',7,NULL,NULL,NULL,48059,48441,'2017-06-03 01:34:10','2017-06-03 01:34:12',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001058',8,NULL,NULL,NULL,48059,48059,'2017-06-03 02:01:01','2017-06-03 02:01:59',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001058',9,NULL,NULL,NULL,48060,48060,'2017-06-03 01:45:16','2017-06-03 01:47:09',_binary '',_binary '',_binary '\0',_binary '\0'),('00001059',10,NULL,NULL,NULL,48151,48441,'2017-06-03 01:33:01','2017-06-03 01:33:14',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001059',11,NULL,NULL,NULL,48441,48151,'2017-06-03 01:33:18','2017-06-03 01:33:22',_binary '\0',_binary '\0',_binary '\0',_binary '\0'),('00001059',12,NULL,NULL,NULL,48253,48253,'2017-06-03 01:33:29','2017-06-03 01:33:36',_binary '\0',_binary '\0',_binary '\0',_binary '\0');
+/*!40000 ALTER TABLE `device_upload_data` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -193,4 +169,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-30 10:29:03
+-- Dump completed on 2022-11-12 10:32:31
