@@ -6,9 +6,10 @@ This document provides an overview on how to start the server and use the API.
 
 Before running this application, make sure your database is up-to-date with the latest schema and has some sample 
 data to query. You can use Alex's `database_schema.sql` query to set up the database and then created your own sample 
-data, or you can use the `alert_db_setup.sql` query found this project's root directory to create both the schema 
-and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of each 
-sprint and anytime you pull down changes related to this project. 
+data, or you can use the `alert_db_dummy_data_setup.sql` query found this project's root directory to create both the 
+schema  and populate it with sample data. It is recommended that you re-run one of these queries at the beginning of
+each sprint and anytime you pull down the latest changes related to the server to make sure your local database works
+as intended.
 
 ## Starting the Server
 
