@@ -16,7 +16,6 @@ const monthHolder = [
   "November",
   "December",
 ];
-
 const baseUrl = "http://localhost:8080/wea/";
 
 const AppContext = React.createContext();
@@ -77,13 +76,13 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}getMessageList?sender=${ao}`);
-    // console.log(result.data);
-    return result.data;
+    const result = await axios(`${baseUrl}${ao}/messages/1`);
+    console.log(result.data.messageStats);
+    return result.data.messageStats;
   };
 
   // useEffects
-  useEffect(() => {
+  http: useEffect(() => {
     getDate();
   });
 
