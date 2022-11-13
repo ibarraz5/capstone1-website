@@ -77,9 +77,9 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}getMessageList?sender=${ao}`);
+    const result = await axios(`${baseUrl}${ao}/messages/1`);
     // console.log(result.data);
-    return result.data;
+    return result.data.messageStats;
   };
 
   // useEffects
