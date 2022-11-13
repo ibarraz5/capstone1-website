@@ -33,7 +33,7 @@ public class WEAController {
     /**
      * Endpoint to request a WEA message from the server.
      * For now, the message is static, but if we decide to
-     * go this route for message retrivial it will be
+     * go this route for message retrieval it will be
      * randomized in the future
      *
      * @return HTTP 200 OK and an XML formatted WEA message
@@ -41,6 +41,10 @@ public class WEAController {
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
         CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
+
+        //uncomment to easily add a message to the database when this endpoint is hit
+        //requires changing the message number in sameCmacMessage to prevent primary key conflicts
+        //model.addToDatabase(dbTemplate);
 
         return ResponseEntity.ok(model);
     }

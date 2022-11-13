@@ -200,6 +200,8 @@ and the stats collected from all the devices that received the message. An AO's 
 the special character '@' which must be encoded as "%40" in order to successfully query the database. A definition of
 each JSON key in the response body is provided in after the example response body.
 
+This endpoint will soon support additional parameters that allow for results filtering
+
 #### Endpoint Usage
 | Endpoint                  | HTTP Verb | Request Body | Parameters   | Success Response | Response Data    |
 |---------------------------|-----------|--------------|--------------|------------------|------------------|
