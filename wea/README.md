@@ -37,7 +37,7 @@ The WEA API has the following endpoints:
 * [Get a Message](#message)
 * [Upload Device Data](#upload)
 * [Get an Upload](#getUpload)
-* [Get Message List by AO](#list)
+* [Get Message Stats by AO](#stats)
 
 ### <a id="message" /> Get a Message
 
@@ -144,18 +144,21 @@ successful PUT, the HTTP response header will contain a Location that points to 
 #### Example Request Body:
 
     <?xml version = "1.0" encoding = "UTF-8"?>
-    <CMAC_user_data>
-        <CMAC_user_time_received>2017-06-03T01:37:50Z</CMAC_user_time_received>
-        <CMAC_user_time_displayed>2017-06-03T01:38:01Z</CMAC_user_time_displayed>
-        <CMAC_user_location_received>048151</CMAC_user_location_received>
-        <CMAC_user_location_displayed>048151</CMAC_user_location_displayed>
-        <CMAC_message_number>00001056</CMAC_message_number>
-        <CMAC_cap_identifier>NOAA-NWS-ALERTS Texas 2017-06-01:32:50Z</CMAC_cap_identifier>
-    </CMAC_user_data>
+    <CMAC_device_data>
+        <CMAC_user_time_received>2017-06-03T01:33:29</CMAC_user_time_received>
+        <CMAC_user_time_displayed>2017-06-03T01:33:36</CMAC_user_time_displayed>
+        <CMAC_user_location_received>48253</CMAC_user_location_received>
+        <CMAC_user_location_displayed>48253</CMAC_user_location_displayed>
+        <CMAC_message_number>00001059</CMAC_message_number>
+        <Received_Outside_Area>false</Received_Outside_Area>
+        <Displayed_Outside_Area>false</Displayed_Outside_Area>
+        <Received_After_Expired>false</Received_After_Expired>
+        <Displayed_After_Expired>false</Displayed_After_Expired>
+    </CMAC_device_data>
 
 #### Example Response Location Header:
 
-    Location | http://localhost:8080/wea/getUpload?identifier=0
+    Location | http://localhost:8080/wea/getUpload?identifier=1
 
 ### <a id="getUpload" />Get an Upload
 
@@ -170,31 +173,114 @@ identifier.
 
 #### Example Request:
 
-    GET http://localhost:8080/wea/getUpload?identifier=1
+    GET http://localhost:8080/wea/getUpload?identifier=12
 
 #### Example Response Body:
 
-    <CMAC_user_data>
-        <CMAC_user_time_received>2017-06-03T01:37:50</CMAC_user_time_received>
-        <CMAC_user_time_displayed>2017-06-03T01:38:01</CMAC_user_time_displayed>
-        <CMAC_user_location_received>48151</CMAC_user_location_received>
-        <CMAC_user_location_displayed>48151</CMAC_user_location_displayed>
-        <CMAC_message_number>00001055</CMAC_message_number>
-        <id>14</id>
-    </CMAC_user_data>
+    <CMAC_device_data>
+        <CMAC_user_time_received>2017-06-03T01:33:29</CMAC_user_time_received>
+        <CMAC_user_time_displayed>2017-06-03T01:33:36</CMAC_user_time_displayed>
+        <CMAC_user_location_received>48253</CMAC_user_location_received>
+        <CMAC_user_location_displayed>48253</CMAC_user_location_displayed>
+        <CMAC_message_number>00001059</CMAC_message_number>
+        <Received_Outside_Area>false</Received_Outside_Area>
+        <Displayed_Outside_Area>false</Displayed_Outside_Area>
+        <Received_After_Expired>false</Received_After_Expired>
+        <Displayed_After_Expired>false</Displayed_After_Expired>
+        <id>12</id>
+    </CMAC_device_data>
 
-### <a id="list" /> Get Message List by AO
+### <a id="stats" /> Get Message Stats by AO
 
-The **Get Message List by AO** endpoint is used to get a list of all messages in the database from a specified AO. 
-On a successful GET, the HTTP response body will contain a JSON array of JSON objects, one object for each message by
-the AO, and each object wil contain that message's unique CMAC_message_number, CMAC_sent_date_time, and the stats 
-collected from all the devices that received the message. An AO's registered sender will contain the special character
-'@' which must be encoded as "%40" in order to successfully query the database. Each stat is defined in the 
-following table:
+The **Get Message Stats by AO** endpoint is used to get the stats of a subset of all messages in the database from a 
+specified AO. Result subsets are divided into pages with up to 9 results per page. The page must be specified in the 
+request url. On a successful GET, the HTTP response body will contain a JSON array of JSON objects, one object for 
+each message by the AO, and each object will contain that message's unique CMAC_message_number, CMAC_sent_date_time, 
+and the stats collected from all the devices that received the message. An AO's registered sender name will contain 
+the special character '@' which must be encoded as "%40" in order to successfully query the database. A definition of
+each JSON key in the response body is provided in after the example response body.
 
-#### Stats Definitions
+#### Endpoint Usage
+| Endpoint                  | HTTP Verb | Request Body | Parameters   | Success Response | Response Data    |
+|---------------------------|-----------|--------------|--------------|------------------|------------------|
+| /{sender}/messages/{page} | GET       | ---          | sender, page | 200              | application/json |
+
+#### Example Request:
+
+    GET http://localhost:8080/wea/w-nws.webmaster%40noaa.gov/messages/1
+
+#### Example Response Body:
+
+    {
+        "messageStats": [
+            {
+                "messageNumber": "00001056",
+                "messageType": "Alert",
+                "date": "2017-06-03 01:32:50",
+                "averageTime": "00:06:59",
+                "shortestTime": "00:05:00",
+                "longestTime": "00:08:57",
+                "averageDelay": "00:00:29",
+                "deviceCount": 2,
+                "receivedOutsideCount": 0,
+                "displayedOutsideCount": 1,
+                "receivedAfterExpiredCount": 0,
+                "displayedAfterExpiredCount": 0
+            },
+            {
+                "messageNumber": "00001057",
+                "messageType": "Alert",
+                "date": "2017-06-03 01:32:50",
+                "averageTime": "00:19:01",
+                "shortestTime": "00:01:00",
+                "longestTime": "00:28:22",
+                "averageDelay": "00:02:08",
+                "deviceCount": 3,
+                "receivedOutsideCount": 1,
+                "displayedOutsideCount": 0,
+                "receivedAfterExpiredCount": 0,
+                "displayedAfterExpiredCount": 0
+            },
+            {
+                "messageNumber": "00001058",
+                "messageType": "Alert",
+                "date": "2017-06-03 01:32:50",
+                "averageTime": "00:11:23",
+                "shortestTime": "00:01:20",
+                "longestTime": "00:28:11",
+                "averageDelay": "00:01:08",
+                "deviceCount": 4,
+                "receivedOutsideCount": 1,
+                "displayedOutsideCount": 1,
+                "receivedAfterExpiredCount": 0,
+                "displayedAfterExpiredCount": 0
+            },
+            {
+                "messageNumber": "00001059",
+                "messageType": "Alert",
+                "date": "2017-06-03 01:32:50",
+                "averageTime": "00:00:26",
+                "shortestTime": "00:00:11",
+                "longestTime": "00:00:39",
+                "averageDelay": "00:00:08",
+                "deviceCount": 3,
+                "receivedOutsideCount": 0,
+                "displayedOutsideCount": 0,
+                "receivedAfterExpiredCount": 0,
+                "displayedAfterExpiredCount": 0
+            }
+        ],
+        "prev": false,
+        "next": false
+    }
+
+#### Json Key Definitions
 | Stat                  | Definition                                                                                                     |
 |-----------------------|----------------------------------------------------------------------------------------------------------------|
+| messageStats          | an array of JSON objects that contain the collected stats for a cmac message                                   |
+| messageNumber         | The CMAC_message_number of the message for which these stats were collected                                    |
+| messageType           | The CMAC_message_type oof the alert                                                                            |
+| date                  | The CMAC_sent_date_time of the alert                                                                           |
 | averageTime           | the average time between when the message was sent and all devices received it                                 |
 | shortestTime          | the shortest time between when the message was sent and all devices received it                                |
 | longestTime           | the longest time between when the message was sent and all devices received it                                 |
@@ -202,39 +288,5 @@ following table:
 | deviceCount           | the number of devices that received the message                                                                |
 | receivedOutsideCount  | the number of devices that received the message outside of the target area                                     |
 | displayedOutsideCount | the average devices for which the alert was displayed on that device outside the target area                   |
-
-#### Endpoint Usage
-| Endpoint        | HTTP Verb | Request Body | Parameters | Success Response | Response Data    |
-|-----------------|-----------|--------------|------------|------------------|------------------|
-| /getMessageList | GET       | ---          | sender     | 200              | application/json |
-
-#### Example Request:
-
-    GET http://localhost:8080/wea/getMessageList?sender=w-nws.webmaster%40noaa.gov
-
-#### Example Response Body:
-
-    [
-        {
-            "messageNumber": "00001056",
-            "date": "2017-06-03 01:32:50",
-            "averageTime": "00:05:00",
-            "shortestTime": "00:05:00",
-            "longestTime": "00:05:00",
-            "averageDelay": "00:00:36",
-            "deviceCount": 2,
-            "receivedOutsideCount": 0,
-            "displayedOutsideCount": 1
-        },
-        {
-            "messageNumber": "00001057",
-            "date": "2017-06-03 01:32:50",
-            "averageTime": "00:19:01",
-            "shortestTime": "00:01:00",
-            "longestTime": "00:28:22",
-            "averageDelay": "00:02:08",
-            "deviceCount": 3,
-            "receivedOutsideCount": 1,
-            "displayedOutsideCount": 0
-        }
-    ]
+| prev                  | A boolean value that represents if there is a previous page of results; this is always true if page > 1        |
+| next                  | A boolean value that represents if there is an additional page of results after this one                       |
