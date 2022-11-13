@@ -18,18 +18,21 @@ CREATE TABLE cmac_polygon_coordinates (
     Longitude DECIMAL(5,2) NOT NULL,
     FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
 );
+
 CREATE TABLE cmac_circle_coordinates (
     CMACMessageNumber VARCHAR(16) NOT NULL,
     Latitude DECIMAL(5,2) NOT NULL,
     Longitude DECIMAL(5,2) NOT NULL,
     FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
 );
+
 CREATE TABLE cmac_area_description (
     CMACMessageNumber VARCHAR(16) NOT NULL,
     AreaName VARCHAR(30) NOT NULL,
     CMASGeocode INT NOT NULL,
     FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
 );
+
 CREATE TABLE device_upload_data (
     CMACMessageNumber VARCHAR(16) NOT NULL,
     UploadID INT NOT NULL AUTO_INCREMENT,

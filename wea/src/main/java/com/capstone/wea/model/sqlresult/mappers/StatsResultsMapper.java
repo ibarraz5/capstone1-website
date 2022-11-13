@@ -8,11 +8,12 @@ import java.sql.SQLException;
 
 public final class StatsResultsMapper implements RowMapper<MessageStatsResult> {
     private MessageStatsResult result;
-    public StatsResultsMapper(MessageStatsResult result) {
-        this.result = result;
+    public StatsResultsMapper() {
+
     }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+        MessageStatsResult result = new MessageStatsResult(rs.getString("CMACMessageNumber"));
         result.setDate(rs.getString("CMACDateTime"));
         result.setMessageType(rs.getString("CMACMessageType"));
         result.setDeviceCount(rs.getInt("DeviceCount"));

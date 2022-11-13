@@ -24,7 +24,8 @@ import java.util.List;
 @RestController
 public class WEAController {
     @Autowired
-    JdbcTemplate dbTemplate;
+    private JdbcTemplate dbTemplate;
+    private final int PAGE_SIZE = 9;
 
     /**
      * Endpoint to request a WEA message from the server.
@@ -101,39 +102,24 @@ public class WEAController {
     /**
      * Gets the list of all CMAC_messages sent by a
      * specified CMAC_sender and the collected stats
-     * for each message.
+     * for each message. Results are returned in pages,
+     * with up to nine messages per page
      *
      * @param sender A CMAC_sender. '@' characters
      *               must be encoded as %40
+     * @param page The page of results to get
      * @return HTTP 200 OK and a JASON array of
      *         objects containing each message's stats
      */
-    @GetMapping("/getMessageList")
-    public ResponseEntity<List<MessageStatsResult>> getMessageList(@RequestParam String sender) {
+    @GetMapping("/{sender}/messages/{page}")
+    public ResponseEntity<List<MessageStatsResult>> getMessageList(@PathVariable String sender,
+                                                                   @PathVariable int page) {
         List<String> numbers = dbTemplate.queryForList("SELECT CMACMessageNumber " +
                         "FROM alert_db.cmac_message " +
                         "WHERE CMACSender = '" + sender + "';",
                 String.class);
 
-        List<MessageStatsResult> resultList = new ArrayList<>();
-
-        for (int i = 0; i < numbers.size(); i++) {
-            resultList.add(new MessageStatsResult(numbers.get(i)));
-            mapMessageStats(numbers.get(i), resultList.get(i));
-        }
-
-        return ResponseEntity.ok(resultList);
-    }
-
-    /**
-     * Maps the stats for a CMAC message to a
-     * MessageStatsResult object
-     *
-     * @param messageNumber The CMAC_message_number
-     * @param stats The MessageStatsResult object
-     */
-    public void mapMessageStats(String messageNumber, MessageStatsResult stats) {
-        dbTemplate.query("SELECT cmac_message.CMACDateTime, CMACMessageType, " +
+        List<MessageStatsResult> resultList = dbTemplate.query("SELECT cmac_message.CMACMessageNumber, cmac_message.CMACDateTime, CMACMessageType, " +
                         "SUM(CASE device_upload_data.CMACMessageNumber WHEN cmac_message.CMACMessageNumber " +
                         "THEN 1 ELSE 0 END) AS DeviceCount, " +
                         "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) " +
@@ -148,8 +134,11 @@ public class WEAController {
                         "SUM(CASE WHEN DisplayedAfterExpired = 1 THEN 1 ELSE 0 END) AS DisplayedExpiredCount " +
                         "FROM alert_db.device_upload_data JOIN alert_db.cmac_message " +
                         "ON cmac_message.CMACMessageNumber = device_upload_data.CMACMessageNumber " +
-                        "WHERE cmac_message.CMACMessageNumber = '" + messageNumber + "';",
-                new StatsResultsMapper(stats));
+                        "GROUP BY cmac_message.CMACMessageNumber " +
+                        "LIMIT " + (PAGE_SIZE + 1) + " OFFSET " + (PAGE_SIZE * (page - 1)) + ";",
+                new StatsResultsMapper());
+
+        return ResponseEntity.ok(resultList);
     }
 
     /**
