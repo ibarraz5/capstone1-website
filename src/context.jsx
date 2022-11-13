@@ -77,7 +77,7 @@ const AppProvider = ({ children }) => {
    */
   const getMessageList = async (ao) => {
     const result = await axios(`${baseUrl}${ao}/messages/1`);
-    console.log(result.data.messageStats);
+    // console.log(result.data);
     return result.data.messageStats;
   };
 
