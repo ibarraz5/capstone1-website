@@ -100,8 +100,11 @@ public class CMACMessageModel {
      */
     public boolean addToDatabase(JdbcTemplate dbTemplate) {
         String query = "INSERT INTO alert_db.cmac_message " +
-                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" + sentDateTime + "', " +
-                "'" + messageType + "');";
+                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" +
+                sentDateTime.replace("Z", "") + "', " + "'" + messageType + "', '" +
+                alertInfo.getSenderName() + "', '" + alertInfo.getExpires().replace("Z", "") + "');";
+
+        System.out.println(query);
 
         //failed to insert
         if (dbTemplate.update(query) == 0) {
@@ -109,7 +112,7 @@ public class CMACMessageModel {
         }
 
         //If another part of this message fails to insert, delete all entries for this message in all tables
-        if (!alertInfo.addToDatabse(dbTemplate, messageNumber, capIdentifier)) {
+        if (!alertInfo.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
             removeFromDatabase(dbTemplate);
             return false;
         }
@@ -129,11 +132,6 @@ public class CMACMessageModel {
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_area_description " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
-
-        dbTemplate.update(query);
-
-        query = "DELETE FROM alert_db.cmac_alert " +
                 "WHERE CMACMessageNumber = '" + messageNumber + "';";
 
         dbTemplate.update(query);

@@ -88,7 +88,7 @@ public class CMACMessageAlertArea {
 
         String[] polyCoordinates;
 
-        if (polygon.isEmpty()) {
+        if (polygon == null || polygon.isEmpty()) {
             polyCoordinates = new String[] {};
         } else {
             polyCoordinates = polygon.split(" ");
@@ -112,7 +112,7 @@ public class CMACMessageAlertArea {
 
         String[] circCoordinates;
 
-        if (circle.isEmpty()) {
+        if (circle == null || circle.isEmpty()) {
             circCoordinates = new String[] {};
         } else {
             circCoordinates = circle.split(" ");
