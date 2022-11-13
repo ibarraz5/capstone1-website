@@ -6,6 +6,9 @@ import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
 import com.capstone.wea.parser.XMLParser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -112,14 +115,15 @@ public class WEAController {
      *         objects containing each message's stats
      */
     @GetMapping("/{sender}/messages/{page}")
-    public ResponseEntity<List<MessageStatsResult>> getMessageList(@PathVariable String sender,
+    public ResponseEntity<ObjectNode> getMessageList(@PathVariable String sender,
                                                                    @PathVariable int page) {
         List<String> numbers = dbTemplate.queryForList("SELECT CMACMessageNumber " +
                         "FROM alert_db.cmac_message " +
                         "WHERE CMACSender = '" + sender + "';",
                 String.class);
 
-        List<MessageStatsResult> resultList = dbTemplate.query("SELECT cmac_message.CMACMessageNumber, cmac_message.CMACDateTime, CMACMessageType, " +
+        List<MessageStatsResult> resultList = dbTemplate.query("SELECT cmac_message.CMACMessageNumber, " +
+                        "cmac_message.CMACDateTime, CMACMessageType, " +
                         "SUM(CASE device_upload_data.CMACMessageNumber WHEN cmac_message.CMACMessageNumber " +
                         "THEN 1 ELSE 0 END) AS DeviceCount, " +
                         "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) " +
@@ -138,7 +142,15 @@ public class WEAController {
                         "LIMIT " + (PAGE_SIZE + 1) + " OFFSET " + (PAGE_SIZE * (page - 1)) + ";",
                 new StatsResultsMapper());
 
-        return ResponseEntity.ok(resultList);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode root = mapper.createObjectNode();
+        root.set("messageStats", mapper.valueToTree(resultList.subList(0, Math.min(resultList.size(), 9))));
+
+        root.set("prev", BooleanNode.valueOf(page > 1));
+        root.set("next", BooleanNode.valueOf(resultList.size() > 9));
+
+
+        return ResponseEntity.ok(root);
     }
 
     /**
