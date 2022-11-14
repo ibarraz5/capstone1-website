@@ -294,14 +294,26 @@ ul {
 .single-alert h5 {
   padding: 0;
   margin: 0;
+  font-size: 1.25rem;
 }
 
-.single-alert footer {
-  padding: 1rem 1.5rem;
+.single-alert svg {
+  background-color: var(--att);
+}
+
+.single-alert header {
+  padding: 0.5rem 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+}
+
+.message-type {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
 /* Modal */
