@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +30,15 @@ public class WEAController {
     @Autowired
     private JdbcTemplate dbTemplate;
     private final int PAGE_SIZE = 9;
+
+    /**
+     * Having now worked with C# for a few months, I really miss this method...
+     *
+     * @return True if the string is null or empty, false if it is not
+     */
+    private boolean isNullOrEmpty(String value) {
+        return (value == null || value.isEmpty());
+    }
 
     /**
      * Endpoint to request a WEA message from the server.
@@ -118,38 +128,102 @@ public class WEAController {
      * @return HTTP 200 OK and a JASON array of
      *         objects containing each message's stats
      */
-    @GetMapping("/{sender}/messages/{page}")
-    public ResponseEntity<ObjectNode> getMessageList(@PathVariable String sender,
-                                                                   @PathVariable int page) {
-        List<String> numbers = dbTemplate.queryForList("SELECT CMACMessageNumber " +
-                        "FROM alert_db.cmac_message " +
-                        "WHERE CMACSender = '" + sender + "';",
-                String.class);
+    @GetMapping("/{sender}/messages/{page}/filter")
+    public ResponseEntity<ObjectNode> getMessageList(@PathVariable String sender, @PathVariable int page,
+                                                     @RequestParam(required = false) String messageNumber,
+                                                     @RequestParam(required = false) String messageType,
+                                                     @RequestParam(required = false) String fromDate,
+                                                     @RequestParam(required = false) String toDate,
+                                                     @RequestParam(required = false) String sortBy,
+                                                     @RequestParam(required = false) String sortOrder) {
+        //common name query
+        String nameQuery = "SELECT CMACSenderName " +
+                "FROM alert_db.cmac_message " +
+                "WHERE CMACSender = '" + sender + "' " +
+                "GROUP BY CMACSenderName;";
 
-        List<MessageStatsResult> resultList = dbTemplate.query("SELECT cmac_message.CMACMessageNumber, " +
-                        "cmac_message.CMACDateTime, CMACMessageType, " +
-                        "SUM(CASE device_upload_data.CMACMessageNumber WHEN cmac_message.CMACMessageNumber " +
-                        "THEN 1 ELSE 0 END) AS DeviceCount, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) " +
-                        "AS AvgTime, " +
-                        "MAX(TIMEDIFF(TimeReceived, CMACDateTime)) AS LongTime, " +
-                        "MIN(TIMEDIFF(TimeReceived, CMACDateTime)) AS ShortTime, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeDisplayed, TimeReceived)))) AS TIME) " +
-                        "AS AvgDelay, " +
-                        "SUM(CASE WHEN ReceivedOutsideArea = 1 THEN 1 ELSE 0 END) AS ReceivedOutsideCount, " +
-                        "SUM(CASE WHEN DisplayedOutsideArea = 1 THEN 1 ELSE 0 END) AS DisplayedOutsideCount, " +
-                        "SUM(CASE WHEN ReceivedAfterExpired = 1 THEN 1 ELSE 0 END) AS ReceivedExpiredCount, " +
-                        "SUM(CASE WHEN DisplayedAfterExpired = 1 THEN 1 ELSE 0 END) AS DisplayedExpiredCount " +
-                        "FROM alert_db.device_upload_data JOIN alert_db.cmac_message " +
-                        "ON cmac_message.CMACMessageNumber = device_upload_data.CMACMessageNumber " +
-                        "GROUP BY cmac_message.CMACMessageNumber " +
-                        "LIMIT " + (PAGE_SIZE + 1) + " OFFSET " + (PAGE_SIZE * (page - 1)) + ";",
-                new StatsResultsMapper());
+        //set base query
+        String baseQuery = "SELECT cmac_message.CMACMessageNumber, CMACDateTime, CMACMessageType, " +
+                "COUNT(*) AS DeviceCount, " +
+                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) AS AvgTime, " +
+                "MAX(TIMEDIFF(TimeReceived, CMACDateTime)) AS LongTime, " +
+                "MIN(TIMEDIFF(TimeReceived, CMACDateTime)) AS ShortTime, " +
+                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeDisplayed, TimeReceived)))) AS TIME) AS AvgDelay, " +
+                "SUM(ReceivedOutsideArea) AS ReceivedOutsideCount, " +
+                "SUM(DisplayedOutsideArea) AS DisplayedOutsideCount, " +
+                "SUM(ReceivedAfterExpired) AS ReceivedExpiredCount, " +
+                "SUM(DisplayedAfterExpired) AS DisplayedExpiredCount " +
+                "FROM alert_db.device_upload_data JOIN alert_db.cmac_message " +
+                "ON cmac_message.CMACMessageNumber = device_upload_data.CMACMessageNumber ";
+
+        //set filtering for query
+        StringBuilder filters = new StringBuilder("WHERE CMACSender = '" + sender + "' ");
+
+        if (!isNullOrEmpty(messageNumber)) {
+            filters.append("&& cmac_message.CMACMessagenumber = '" + messageNumber + "' ");
+        }
+
+        if (!isNullOrEmpty(messageType)) {
+            filters.append("&& CMACMessageType LIKE '%" + messageType + "%' ");
+        }
+
+        if (!isNullOrEmpty(fromDate)) {
+            filters.append("&& CMACDateTime >= '" + fromDate + "' ");
+        }
+
+        if (!isNullOrEmpty(toDate)) {
+            filters.append("&& CMACDateTime < DATE_ADD('" + toDate + "', INTERVAL 1 DAY) ");
+        }
+
+        String grouping = "GROUP BY cmac_message.CMACMessageNumber ";
+
+        //set sorting and ordering
+        if (isNullOrEmpty(sortBy) || (!sortBy.equalsIgnoreCase("number")
+                && !sortBy.equalsIgnoreCase("date")) || sortBy.equalsIgnoreCase("date")) {
+            sortBy = "CMACDateTime";
+        } else {
+            sortBy = "cmac_message.CMACMessagenumber";
+        }
+
+        if (isNullOrEmpty(sortOrder) || (!sortOrder.equalsIgnoreCase("ASC"))
+                && !sortOrder.equalsIgnoreCase("DESC")) {
+            sortOrder = "DESC";
+        } else {
+            sortOrder = sortOrder.toUpperCase();
+        }
+
+        String sorting = "ORDER BY " + sortBy + " " + sortOrder + " ";
+
+        //make sure page is positive
+        if (page < 1) {
+            page = 1;
+        }
+
+        String limit = "LIMIT " + (PAGE_SIZE + 1) + " OFFSET " +
+                (PAGE_SIZE * (page - 1)) + ";";
+
+        StringBuilder query = new StringBuilder(2000)
+                .append(baseQuery)
+                .append(filters)
+                .append(grouping)
+                .append(sorting)
+                .append(limit);
+
+        //override default exception response to avoid showing stacktrace, which may contain table names
+        List<MessageStatsResult> resultList;
+        String commoneName;
+        try {
+            resultList = dbTemplate.query(query.toString(), new StatsResultsMapper());
+            commoneName = dbTemplate.queryForObject(nameQuery, String.class);
+        } catch (BadSqlGrammarException e) {
+            e.printStackTrace();
+            throw new InternalError("Bad SQL Grammar");
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode root = mapper.createObjectNode();
         root.set("messageStats", mapper.valueToTree(resultList.subList(0, Math.min(resultList.size(), 9))));
-
+        root.set("commonName", mapper.valueToTree(commoneName));
         root.set("prev", BooleanNode.valueOf(page > 1));
         root.set("next", BooleanNode.valueOf(resultList.size() > 9));
 
