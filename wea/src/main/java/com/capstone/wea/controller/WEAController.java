@@ -6,10 +6,14 @@ import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
 import com.capstone.wea.parser.XMLParser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,12 +28,22 @@ import java.util.List;
 @RestController
 public class WEAController {
     @Autowired
-    JdbcTemplate dbTemplate;
+    private JdbcTemplate dbTemplate;
+    private final int PAGE_SIZE = 9;
+
+    /**
+     * Having now worked with C# for a few months, I really miss this method...
+     *
+     * @return True if the string is null or empty, false if it is not
+     */
+    private boolean isNullOrEmpty(String value) {
+        return (value == null || value.isEmpty());
+    }
 
     /**
      * Endpoint to request a WEA message from the server.
      * For now, the message is static, but if we decide to
-     * go this route for message retrivial it will be
+     * go this route for message retrieval it will be
      * randomized in the future
      *
      * @return HTTP 200 OK and an XML formatted WEA message
@@ -37,6 +51,10 @@ public class WEAController {
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
         CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
+
+        //uncomment to easily add a message to the database when this endpoint is hit
+        //requires changing the message number in sameCmacMessage to prevent primary key conflicts
+        //model.addToDatabase(dbTemplate);
 
         return ResponseEntity.ok(model);
     }
@@ -56,12 +74,15 @@ public class WEAController {
      *         uploaded data
      */
     @PutMapping(value = "/upload")
-    public ResponseEntity<String> upload(@RequestBody CollectedUserData userData) {
-        String query = "INSERT INTO alert_db.device VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
+    public ResponseEntity<String> upload(@RequestBody CollectedDeviceData userData) {
+        String query = "INSERT INTO alert_db.device_upload_data VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
                 "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
-                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "');";
+                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "', " +
+                userData.isReceivedOutsideArea() + ", " + userData.isDisplayedOutsideArea() + ", " +
+                userData.isReceivedAfterExpired() + ", " + userData.isDisplayedAfterExpired() + ");";
         dbTemplate.update(query);
 
+        //gets the UploadID of the most recently inserted row
         query = "SELECT LAST_INSERT_ID();";
         Integer id = dbTemplate.queryForObject(query, Integer.class);
 
@@ -85,12 +106,12 @@ public class WEAController {
      *         FOUND if the identifier is invalid
      */
     @GetMapping(value = "/getUpload", produces = "application/xml")
-    public ResponseEntity<CollectedUserData> getUpload(@RequestParam int identifier) {
+    public ResponseEntity<CollectedDeviceData> getUpload(@RequestParam int identifier) {
         String query = "SELECT * " +
-                "FROM alert_db.device " +
-                "WHERE device.InternalDeviceID = '" + identifier + "';";
+                "FROM alert_db.device_upload_data " +
+                "WHERE device_upload_data.UploadID = '" + identifier + "';";
 
-        CollectedUserData data = dbTemplate.queryForObject(query, new CollectedUserDataMapper());
+        CollectedDeviceData data = dbTemplate.queryForObject(query, new CollectedDeviceDataMapper());
 
         return ResponseEntity.ok(data);
     }
@@ -98,59 +119,116 @@ public class WEAController {
     /**
      * Gets the list of all CMAC_messages sent by a
      * specified CMAC_sender and the collected stats
-     * for each message.
+     * for each message. Results are returned in pages,
+     * with up to nine messages per page
      *
      * @param sender A CMAC_sender. '@' characters
      *               must be encoded as %40
+     * @param page The page of results to get
      * @return HTTP 200 OK and a JASON array of
      *         objects containing each message's stats
      */
-    @GetMapping("/getMessageList")
-    public ResponseEntity<List<MessageStatsResult>> getMessageList(@RequestParam String sender) {
-        List<String> numbers = dbTemplate.queryForList("SELECT CMACMessageNumber " +
-                        "FROM alert_db.cmac_message " +
-                        "WHERE CMACSender = '" + sender + "';",
-                String.class);
+    @GetMapping("/{sender}/messages/{page}/filter")
+    public ResponseEntity<ObjectNode> getMessageList(@PathVariable String sender, @PathVariable int page,
+                                                     @RequestParam(required = false) String messageNumber,
+                                                     @RequestParam(required = false) String messageType,
+                                                     @RequestParam(required = false) String fromDate,
+                                                     @RequestParam(required = false) String toDate,
+                                                     @RequestParam(required = false) String sortBy,
+                                                     @RequestParam(required = false) String sortOrder) {
+        //common name query
+        String nameQuery = "SELECT CMACSenderName " +
+                "FROM alert_db.cmac_message " +
+                "WHERE CMACSender = '" + sender + "' " +
+                "GROUP BY CMACSenderName;";
 
-        List<MessageStatsResult> resultList = new ArrayList<>();
+        //set base query
+        String baseQuery = "SELECT cmac_message.CMACMessageNumber, CMACDateTime, CMACMessageType, " +
+                "COUNT(*) AS DeviceCount, " +
+                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeReceived, CMACDateTime)))) AS TIME) AS AvgTime, " +
+                "MAX(TIMEDIFF(TimeReceived, CMACDateTime)) AS LongTime, " +
+                "MIN(TIMEDIFF(TimeReceived, CMACDateTime)) AS ShortTime, " +
+                "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(TimeDisplayed, TimeReceived)))) AS TIME) AS AvgDelay, " +
+                "SUM(ReceivedOutsideArea) AS ReceivedOutsideCount, " +
+                "SUM(DisplayedOutsideArea) AS DisplayedOutsideCount, " +
+                "SUM(ReceivedAfterExpired) AS ReceivedExpiredCount, " +
+                "SUM(DisplayedAfterExpired) AS DisplayedExpiredCount " +
+                "FROM alert_db.device_upload_data JOIN alert_db.cmac_message " +
+                "ON cmac_message.CMACMessageNumber = device_upload_data.CMACMessageNumber ";
 
-        for (int i = 0; i < numbers.size(); i++) {
-            resultList.add(new MessageStatsResult(numbers.get(i)));
-            mapMessageStats(numbers.get(i), resultList.get(i));
+        //set filtering for query
+        StringBuilder filters = new StringBuilder("WHERE CMACSender = '" + sender + "' ");
+
+        if (!isNullOrEmpty(messageNumber)) {
+            filters.append("&& cmac_message.CMACMessagenumber = '" + messageNumber + "' ");
         }
 
-        return ResponseEntity.ok(resultList);
-    }
+        if (!isNullOrEmpty(messageType)) {
+            filters.append("&& CMACMessageType LIKE '%" + messageType + "%' ");
+        }
 
-    /**
-     * Maps the stats for a CMAC message to a
-     * MessageStatsResult object
-     *
-     * @param messageNumber The CMAC_message_number
-     * @param stats The MessageStatsResult object
-     */
-    public void mapMessageStats(String messageNumber, MessageStatsResult stats) {
-        dbTemplate.query("SELECT cmac_message.CMACDateTime, SUM(CASE device.CMACMessageNumber WHEN " +
-                        "cmac_message.CMACMessageNumber THEN 1 ELSE 0 END) AS DeviceCount, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeReceived, " +
-                        "cmac_message.CMACDateTime)))) AS TIME) AS AvgTime, " +
-                        "MAX(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS LongTime, " +
-                        "MIN(TIMEDIFF(device.TimeReceived, cmac_message.CMACDateTime)) AS ShortTime, " +
-                        "CAST(SEC_TO_TIME(AVG(TIME_TO_SEC(TIMEDIFF(device.TimeDisplayed, device.TimeReceived)))) AS " +
-                        "TIME) AS AvgDelay " +
-                        "FROM alert_db.device JOIN alert_db.cmac_message " +
-                        "ON cmac_message.CMACMessageNumber = device.CMACMessageNumber " +
-                        "WHERE cmac_message.CMACMessageNumber = '" + messageNumber + "';",
-                new StatsResultsMapper(stats));
+        if (!isNullOrEmpty(fromDate)) {
+            filters.append("&& CMACDateTime >= '" + fromDate + "' ");
+        }
 
-        dbTemplate.query("SELECT SUM(CASE device.LocationReceived WHEN cmac_area_description.CMASGeocode THEN 1 " +
-                        "ELSE 0 END) AS ReceivedInside, " +
-                        "SUM(CASE device.LocationDisplayed WHEN cmac_area_description.CMASGeocode THEN 1 ELSE 0 END) " +
-                        "AS DisplayedInside " +
-                        "FROM alert_db.device JOIN alert_db.cmac_area_description " +
-                        "ON device.CMACMessageNumber = cmac_area_description.CMACMessageNumber " +
-                        "WHERE device.CMACMessageNumber = '" + messageNumber + "';",
-                new ReceivedDisplayedCountMapper(stats));
+        if (!isNullOrEmpty(toDate)) {
+            filters.append("&& CMACDateTime < DATE_ADD('" + toDate + "', INTERVAL 1 DAY) ");
+        }
+
+        String grouping = "GROUP BY cmac_message.CMACMessageNumber ";
+
+        //set sorting and ordering
+        if (isNullOrEmpty(sortBy) || (!sortBy.equalsIgnoreCase("number")
+                && !sortBy.equalsIgnoreCase("date")) || sortBy.equalsIgnoreCase("date")) {
+            sortBy = "CMACDateTime";
+        } else {
+            sortBy = "cmac_message.CMACMessagenumber";
+        }
+
+        if (isNullOrEmpty(sortOrder) || (!sortOrder.equalsIgnoreCase("ASC"))
+                && !sortOrder.equalsIgnoreCase("DESC")) {
+            sortOrder = "DESC";
+        } else {
+            sortOrder = sortOrder.toUpperCase();
+        }
+
+        String sorting = "ORDER BY " + sortBy + " " + sortOrder + " ";
+
+        //make sure page is positive
+        if (page < 1) {
+            page = 1;
+        }
+
+        String limit = "LIMIT " + (PAGE_SIZE + 1) + " OFFSET " +
+                (PAGE_SIZE * (page - 1)) + ";";
+
+        StringBuilder query = new StringBuilder(2000)
+                .append(baseQuery)
+                .append(filters)
+                .append(grouping)
+                .append(sorting)
+                .append(limit);
+
+        //override default exception response to avoid showing stacktrace, which may contain table names
+        List<MessageStatsResult> resultList;
+        String commoneName;
+        try {
+            resultList = dbTemplate.query(query.toString(), new StatsResultsMapper());
+            commoneName = dbTemplate.queryForObject(nameQuery, String.class);
+        } catch (BadSqlGrammarException e) {
+            e.printStackTrace();
+            throw new InternalError("Bad SQL Grammar");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode root = mapper.createObjectNode();
+        root.set("messageStats", mapper.valueToTree(resultList.subList(0, Math.min(resultList.size(), 9))));
+        root.set("commonName", mapper.valueToTree(commoneName));
+        root.set("prev", BooleanNode.valueOf(page > 1));
+        root.set("next", BooleanNode.valueOf(resultList.size() > 9));
+
+
+        return ResponseEntity.ok(root);
     }
 
     /**
