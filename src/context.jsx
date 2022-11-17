@@ -30,6 +30,8 @@ const AppProvider = ({ children }) => {
   const [alertOriginator, setAlertOriginator] = useState("");
   const [login, setLogin] = useState(false);
   const [dbAlertList, setDbAlertList] = useState([]);
+  const [fullData, setFullData] = useState([]);
+  const [page, setPage] = useState(1);
 
   // Functions
   const getDate = () => {
@@ -49,21 +51,32 @@ const AppProvider = ({ children }) => {
   const selectAlert = (idAlert) => {
     let alert;
 
-    console.log(idAlert);
-
-    console.log("Before filter");
-    console.log(dbAlertList);
-
     alert = dbAlertList.filter((alert) => alert.messageNumber === idAlert);
-
-    console.log("After filter");
-    console.log(alert);
     setSelectedAlert(alert);
     setShowModal(true);
   };
 
   const closeModal = () => {
+    if (dbAlertList.length === 0) {
+      return;
+    }
     setShowModal(false);
+  };
+
+  const increasePage = () => {
+    if (fullData.next) {
+      let curr = page;
+      curr = curr + 1;
+      setPage(curr);
+    }
+  };
+
+  const decreasePage = () => {
+    if (fullData.prev) {
+      let curr = page;
+      curr = curr - 1;
+      setPage(curr);
+    }
   };
 
   /**
@@ -76,13 +89,12 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}${ao}/messages/1`);
-    // console.log(result.data);
-    return result.data.messageStats;
+    const result = await axios(`${baseUrl}${ao}/messages/${page}`);
+    return result.data;
   };
 
   // useEffects
-  http: useEffect(() => {
+  useEffect(() => {
     getDate();
   });
 
@@ -91,10 +103,25 @@ const AppProvider = ({ children }) => {
       return;
     }
 
-    const data = getMessageList(alertOriginator).then((data) =>
-      setDbAlertList(data)
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
     );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
   }, [alertOriginator]);
+
+  useEffect(() => {
+    if (!alertOriginator) {
+      return;
+    }
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
+    );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
+  }, [page]);
 
   return (
     <AppContext.Provider
@@ -109,6 +136,9 @@ const AppProvider = ({ children }) => {
         alertOriginator,
         login,
         setLogin,
+        page,
+        increasePage,
+        decreasePage,
       }}
     >
       {children}

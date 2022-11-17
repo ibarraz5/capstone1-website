@@ -249,6 +249,42 @@ ul {
   font-size: 1.5rem;
 }
 
+/* NavOptions */
+.nav-options {
+  background-color: var(--grey-300);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.nav-btn {
+  font-size: 1.25rem;
+  color: var(--grey-800);
+  background-color: var(--primary-300);
+}
+
+.btn-hipster:hover {
+  color: var(--grey-800);
+  background-color: var(--primary-400);
+}
+
+.curr-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.curr-page {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 15px;
+}
+
 /* Alerts */
 
 .section-center {
