@@ -89,7 +89,7 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}${ao}/messages/${page}`);
+    const result = await axios(`${baseUrl}${ao}/messages/${page}/filter`);
     return result.data;
   };
 
@@ -133,12 +133,12 @@ const AppProvider = ({ children }) => {
         selectedAlert,
         closeModal,
         setAlertOriginator,
-        alertOriginator,
         login,
         setLogin,
         page,
         increasePage,
         decreasePage,
+        fullData,
       }}
     >
       {children}
