@@ -16,7 +16,6 @@ const monthHolder = [
   "November",
   "December",
 ];
-
 const baseUrl = "http://localhost:8080/wea/";
 
 const AppContext = React.createContext();
@@ -31,6 +30,9 @@ const AppProvider = ({ children }) => {
   const [alertOriginator, setAlertOriginator] = useState("");
   const [login, setLogin] = useState(false);
   const [dbAlertList, setDbAlertList] = useState([]);
+  const [fullData, setFullData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState("");
 
   // Functions
   const getDate = () => {
@@ -50,21 +52,46 @@ const AppProvider = ({ children }) => {
   const selectAlert = (idAlert) => {
     let alert;
 
-    console.log(idAlert);
-
-    console.log("Before filter");
-    console.log(dbAlertList);
-
     alert = dbAlertList.filter((alert) => alert.messageNumber === idAlert);
-
-    console.log("After filter");
-    console.log(alert);
     setSelectedAlert(alert);
     setShowModal(true);
   };
 
   const closeModal = () => {
+    if (dbAlertList.length === 0) {
+      return;
+    }
     setShowModal(false);
+  };
+
+  const increasePage = () => {
+    if (fullData.next) {
+      let curr = page;
+      curr = curr + 1;
+      setPage(curr);
+    }
+  };
+
+  const decreasePage = () => {
+    if (fullData.prev) {
+      let curr = page;
+      curr = curr - 1;
+      setPage(curr);
+    }
+  };
+
+  const buildFilters = ({ mType, mNum, frDate, toDate, sortBy, sortOrder }) => {
+    let filterString = `?${mType !== "" ? "messageType=" : ""}${mType}${
+      mType !== "" ? "&" : ""
+    }${mNum !== "" ? "messageNumber=" : ""}${mNum}${mNum !== "" ? "&" : ""}${
+      frDate !== "" ? "fromDate=" : ""
+    }${frDate}${frDate !== "" ? "&" : ""}${
+      toDate !== "" ? "toDate=" : ""
+    }${toDate}${
+      toDate !== "" ? "&" : ""
+    }sortBy=${sortBy}&sortOrder=${sortOrder}`;
+
+    setFilters(filterString);
   };
 
   /**
@@ -77,8 +104,9 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}getMessageList?sender=${ao}`);
-    // console.log(result.data);
+    const result = await axios(
+      `${baseUrl}${ao}/messages/${page}/filter${filters}`
+    );
     return result.data;
   };
 
@@ -92,10 +120,37 @@ const AppProvider = ({ children }) => {
       return;
     }
 
-    const data = getMessageList(alertOriginator).then((data) =>
-      setDbAlertList(data)
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
     );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
   }, [alertOriginator]);
+
+  useEffect(() => {
+    if (!alertOriginator) {
+      return;
+    }
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
+    );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
+  }, [page]);
+
+  useEffect(() => {
+    if (!alertOriginator) {
+      return;
+    }
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
+    );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
+  }, [filters]);
 
   return (
     <AppContext.Provider
@@ -107,9 +162,14 @@ const AppProvider = ({ children }) => {
         selectedAlert,
         closeModal,
         setAlertOriginator,
-        alertOriginator,
         login,
         setLogin,
+        page,
+        setPage,
+        increasePage,
+        decreasePage,
+        fullData,
+        buildFilters,
       }}
     >
       {children}

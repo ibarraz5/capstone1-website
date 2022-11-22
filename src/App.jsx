@@ -4,8 +4,9 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Alerts from "./components/Alerts";
 import Modal from "./components/Modal";
-// import Body from "./components/Body";
 import Login from "./components/Login";
+import NavOptions from "./components/NavOptions";
+import Filters from "./components/Filters";
 
 // I placed test text and context placeholder text for
 // everyone to hopefully understand how the context works.
@@ -20,9 +21,10 @@ function App() {
         <div className="content-wrap">
           {!login && <Login></Login>}
           {login && <Header></Header>}
+          {login && <Filters></Filters>}
+          {login && <NavOptions></NavOptions>}
           {login && <Alerts></Alerts>}
           {showModal && <Modal></Modal>}
-          {/* {login && <Body></Body>} */}
         </div>
         {login && <Footer></Footer>}
       </div>

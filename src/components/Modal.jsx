@@ -13,6 +13,8 @@ const Modal = () => {
     deviceCount,
     receivedOutsideCount,
     displayedOutsideCount,
+    receivedAfterExpiredCount,
+    displayedAfterExpiredCount,
   } = selectedAlert[0];
 
   return (
@@ -55,8 +57,14 @@ const Modal = () => {
           <p>CMAC Highest Reponse Time: {longestTime}</p>
           <p>CMAC Average Time Delay: {averageDelay}</p>
           <p>Device Count: {deviceCount}</p>
-          <p>Devices outside of Alert Geo: {receivedOutsideCount}</p>
-          <p>Total devices reached: {displayedOutsideCount}</p>
+          <p>Total devices receieved outside area: {receivedOutsideCount}</p>
+          <p>Total devices receieved outside area: {displayedOutsideCount}</p>
+          <p>
+            Total devices received after expired: {receivedAfterExpiredCount}
+          </p>
+          <p>
+            Total devices displayed after expired: {displayedAfterExpiredCount}
+          </p>
           <button className="btn btn-hipster close-btn" onClick={closeModal}>
             Close
           </button>

@@ -1,6 +1,5 @@
 package com.capstone.wea.model.sqlresult;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.sql.Time;
@@ -8,6 +7,9 @@ import java.sql.Time;
 public class MessageStatsResult {
     @JsonProperty("messageNumber")
     private String messageNumber;
+
+    @JsonProperty("messageType")
+    private String messageType;
 
     @JsonProperty("date")
     private String date;
@@ -26,11 +28,17 @@ public class MessageStatsResult {
     @JsonProperty("deviceCount")
     private int deviceCount;
 
-    @JsonIgnoreProperties
-    private int receivedInsideCount;
+    @JsonProperty("receivedOutsideCount")
+    private int receivedOutsideCount;
 
-    @JsonIgnoreProperties
-    private int displayedInsideCount;
+    @JsonProperty("displayedOutsideCount")
+    private int displayedOutsideCount;
+
+    @JsonProperty("receivedAfterExpiredCount")
+    private int receivedAfterExpiredCount;
+
+    @JsonProperty("displayedAfterExpiredCount")
+    private int displayedAfterExpiredCount;
 
     public MessageStatsResult(String messageNumber) {
         this.messageNumber = messageNumber;
@@ -108,46 +116,51 @@ public class MessageStatsResult {
     }
 
     /**
-     * Sets the number of devices that were inside the
+     * Sets the number of devices that were outside the
      * message's target area when the message was received
      *
-     * @param receivedInsideCount the number of devices
+     * @param receivedOutsideCount the number of devices
      */
-    public void setReceivedInsideCount(int receivedInsideCount) {
-        this.receivedInsideCount = receivedInsideCount;
+    public void setReceivedOutsideCount(int receivedOutsideCount) {
+        this.receivedOutsideCount = receivedOutsideCount;
     }
 
     /**
-     * Sets the number of devices that were inside the
+     * Sets the number of devices that were outside the
      * message's target area when the message was displayed
      *
-     * @param displayedInsideCount the number of devices
+     * @param displayedOutsideCount the number of devices
      */
-    public void setDisplayedInsideCount(int displayedInsideCount) {
-        this.displayedInsideCount = displayedInsideCount;
+    public void setDisplayedOutsideCount(int displayedOutsideCount) {
+        this.displayedOutsideCount = displayedOutsideCount;
     }
 
     /**
-     * Gets the number of devices for which the message
-     * was received while the device was outside the
-     * target area
+     * Sets the alert's CMAC_message_type type (Alert, Update, etc)
      *
-     * @return The number of devices
+     * @param messageType the CMAC_message_type
      */
-    @JsonProperty("receivedOutsideCount")
-    public int getReceivedOutsideCount() {
-        return deviceCount - receivedInsideCount;
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 
     /**
-     * Gets the number of devices for which the message
-     * was received while the device was outside the
-     * target area
+     * Sets the number of messages that received the message after that
+     * message's expiration time
      *
-     * @return The number of devices
+     * @param receivedAfterExpiredCount The number of device
      */
-    @JsonProperty("displayedOutsideCount")
-    public int getDisplayedOutsideCount() {
-        return deviceCount - displayedInsideCount;
+    public void setReceivedAfterExpiredCount(int receivedAfterExpiredCount) {
+        this.receivedAfterExpiredCount = receivedAfterExpiredCount;
+    }
+
+    /**
+     * Sets the number of messages that displayed the message on the device
+     * after the message's expiration time
+     *
+     * @param displayedAfterExpiredCount  The number of device
+     */
+    public void setDisplayedAfterExpiredCount(int displayedAfterExpiredCount) {
+        this.displayedAfterExpiredCount = displayedAfterExpiredCount;
     }
 }

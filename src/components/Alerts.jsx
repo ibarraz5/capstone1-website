@@ -1,7 +1,15 @@
 import { useGlobalContext } from "../context";
 
 const Alerts = () => {
-  const { selectAlert, dbAlertList } = useGlobalContext();
+  const { selectAlert, dbAlertList, page } = useGlobalContext();
+
+  if (dbAlertList.length < 1 && page !== 1) {
+    return (
+      <section>
+        <h4>No more results.</h4>
+      </section>
+    );
+  }
 
   if (dbAlertList.length < 1) {
     return (
@@ -14,10 +22,15 @@ const Alerts = () => {
   return (
     <section className="section-center">
       {dbAlertList.map((alert) => {
-        const { messageNumber, date } = alert;
+        const { messageNumber, date, messageType } = alert;
 
         return (
           <article key={messageNumber} className="single-alert">
+            <header>
+              <h5>{date}</h5>
+              <h5>{messageNumber}</h5>
+            </header>
+
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="300"
@@ -41,8 +54,7 @@ const Alerts = () => {
               </text>
             </svg>
             <footer>
-              <h5>{date}</h5>
-              <h5>{messageNumber}</h5>
+              <h5 className="message-type">{messageType}</h5>
             </footer>
           </article>
         );

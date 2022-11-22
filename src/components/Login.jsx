@@ -50,14 +50,6 @@ const Login = () => {
           value={user}
         ></input>
 
-        {/* This is currently dummy info */}
-        <input
-          className="form-input"
-          type="text"
-          placeholder="Password"
-          // onChange={handleChange}
-          //value={user}
-        ></input>
         <button className="btn" type="submit">
           Login
         </button>

@@ -1,8 +1,7 @@
 import { useGlobalContext } from "../context";
 
 const Header = () => {
-  const { date, alertOriginator } = useGlobalContext();
-  const ao = alertOriginator.replace("%40", "@");
+  const { date, fullData } = useGlobalContext();
 
   return (
     <header className="header-container">
@@ -29,7 +28,8 @@ const Header = () => {
       </a>
       <div className="inner-container">
         <h4 className="header-text">
-          CMAC Alert Data <span className="alert-originator">{ao}</span>
+          CMAC Alert Data{" "}
+          <span className="alert-originator">{fullData.commonName}</span>
         </h4>
         <p className="date">{date}</p>
       </div>

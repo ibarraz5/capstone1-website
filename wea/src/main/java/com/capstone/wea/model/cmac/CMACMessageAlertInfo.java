@@ -73,15 +73,7 @@ public class CMACMessageAlertInfo {
         this.alertTextList = alertTextList;
     }
 
-    public boolean addToDatabse(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
-        String query = "INSERT INTO alert_db.cmac_alert " +
-                "VALUES ('" + senderName + "', '" + expires + "', '" + messageNumber + "', '" + capIdentifier + "');";
-
-        //failed to insert
-        if (dbTemplate.update(query) == 0) {
-            return false;
-        }
-
+    public boolean addToDatabase(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
         //failed to insert an area list, must delete this entry and all added alert areas
         for (int i = 0; i < alertAreaList.size(); i++) {
             if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
