@@ -19,8 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
+import java.net.URL;
+import java.time.Clock;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.List;
 
 @RequestMapping("/wea")
@@ -30,6 +36,14 @@ public class WEAController {
     @Autowired
     private JdbcTemplate dbTemplate;
     private final int PAGE_SIZE = 9;
+    private final String IPAWS_PIN_PARAMETER = "?pin=NnducW4wcTdldjE";
+    private final String IPAWS_TEST_URL = "https://tdl.apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/";
+    private final String IPAWS_PROD_URL = "https://apps.fema.gov/IPAWSOPEN_EAS_SERVICE/rest/";
+    private final String EAS_FEED = "eas/recent/";
+    private final String PUBLIC_NON_EAS_FEED = "public_non_eas/recent/";
+    private final String PUBLIC_FEED = "public/recent/";
+    private final String WEA_FEED = "PublicWEA/recent/";
+    //private final DateTimeFormatter ISO_UTC_FORMAT = new DateTimeFormatter
 
     /**
      * Having now worked with C# for a few months, I really miss this method...
@@ -38,6 +52,52 @@ public class WEAController {
      */
     private boolean isNullOrEmpty(String value) {
         return (value == null || value.isEmpty());
+    }
+
+    /**
+     * Hits the IPAWS API to see if there are any new messages. If new messages are found
+     * they are added to the database.
+     *
+     * @param env The IPAWS environment API to hit; valid values are "test" and "prod";
+     *            If an invalid value is passed, the test environment will be used
+     * @param dateTime String representation of how far back to query; If this time is within 5
+     *                 minutes of the current time results wil include all messages sent within
+     *                 the last 5 minutes; The maximum amount of time you can go back is 30
+     *                 minutes
+     * @param feed The feed API to hit; the valid values are: "eas", "non-eas", "public", and "wea";
+     *             If an invalid feed is provided, "wea" will be used
+     * @return True if new messages are found, false if they are not
+     */
+    private boolean getMessageFromIpaws(String env, ZonedDateTime dateTime, String feed) throws MalformedURLException {
+        StringBuilder ipawsUrl = new StringBuilder();
+        if (env.equalsIgnoreCase("prod")) {
+            ipawsUrl.append(IPAWS_PROD_URL);
+        } else {
+            ipawsUrl.append(IPAWS_TEST_URL);
+        }
+
+        if (feed.equalsIgnoreCase("eas")) {
+            ipawsUrl.append(EAS_FEED);
+        } else if (feed.equalsIgnoreCase("non-eas")) {
+            ipawsUrl.append(PUBLIC_NON_EAS_FEED);
+        } else if (feed.equalsIgnoreCase("public")) {
+            ipawsUrl.append(PUBLIC_FEED);
+        } else {
+            ipawsUrl.append(WEA_FEED);
+        }
+
+        if (dateTime == null) {
+            dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0);
+        } else if (ZonedDateTime.now().minusMinutes(30).isBefore(dateTime)) {
+            dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0).minusMinutes(30);
+        }
+
+        ipawsUrl.append(dateTime.format(DateTimeFormatter.ISO_INSTANT).toString())
+                .append(IPAWS_PIN_PARAMETER);
+
+        URL getIpaws = new URL(ipawsUrl.toString());
+        System.out.println(getIpaws.toString());
+        return true;
     }
 
     /**
@@ -270,5 +330,26 @@ public class WEAController {
         }
 
         return ResponseEntity.ok(cmac);
+    }
+
+    /**
+     * Debugging endpoint for IPAWS connection validation
+     *
+     * @return HTTP 200 OK and an XML CMAC message body if the
+     *         message was successfully added to the database,
+     *         otherwise HTTP 400 BAD REQUEST
+     */
+    @GetMapping(value = "/getIpawsAlerts")
+    public ResponseEntity<Boolean> getIpawsAlerts() {
+        Boolean result;
+        try {
+            getMessageFromIpaws("", null, "");
+            result = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = false;
+        }
+
+        return ResponseEntity.ok(result);
     }
 }
