@@ -32,6 +32,7 @@ const AppProvider = ({ children }) => {
   const [dbAlertList, setDbAlertList] = useState([]);
   const [fullData, setFullData] = useState([]);
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState("");
 
   // Functions
   const getDate = () => {
@@ -79,6 +80,20 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  const buildFilters = ({ mType, mNum, frDate, toDate, sortBy, sortOrder }) => {
+    let filterString = `?${mType !== "" ? "messageType=" : ""}${mType}${
+      mType !== "" ? "&" : ""
+    }${mNum !== "" ? "messageNumber=" : ""}${mNum}${mNum !== "" ? "&" : ""}${
+      frDate !== "" ? "fromDate=" : ""
+    }${frDate}${frDate !== "" ? "&" : ""}${
+      toDate !== "" ? "toDate=" : ""
+    }${toDate}${
+      toDate !== "" ? "&" : ""
+    }sortBy=${sortBy}&sortOrder=${sortOrder}`;
+
+    setFilters(filterString);
+  };
+
   /**
    * Fetches a list of cmac_message_numbers and their cmac_sent_date_times
    * that belong to a specified AO from the server. Call this function
@@ -89,7 +104,9 @@ const AppProvider = ({ children }) => {
    *                    '@' characters must be encoded as "%40"
    */
   const getMessageList = async (ao) => {
-    const result = await axios(`${baseUrl}${ao}/messages/${page}`);
+    const result = await axios(
+      `${baseUrl}${ao}/messages/${page}/filter${filters}`
+    );
     return result.data;
   };
 
@@ -123,6 +140,18 @@ const AppProvider = ({ children }) => {
     // eslint-disable-next-line
   }, [page]);
 
+  useEffect(() => {
+    if (!alertOriginator) {
+      return;
+    }
+    getMessageList(alertOriginator).then((data) =>
+      setDbAlertList(data.messageStats)
+    );
+
+    getMessageList(alertOriginator).then((data) => setFullData(data));
+    // eslint-disable-next-line
+  }, [filters]);
+
   return (
     <AppContext.Provider
       value={{
@@ -133,12 +162,14 @@ const AppProvider = ({ children }) => {
         selectedAlert,
         closeModal,
         setAlertOriginator,
-        alertOriginator,
         login,
         setLogin,
         page,
+        setPage,
         increasePage,
         decreasePage,
+        fullData,
+        buildFilters,
       }}
     >
       {children}

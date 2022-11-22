@@ -26,7 +26,6 @@ const Footer = () => {
         <p>Aaron Cordeau</p>
         <p>Alex Klein</p>
         <p>Derek Argall</p>
-        <p>Jeff Ayres</p>
         <p>Ivan Barraza Duran</p>
       </div>
     </footer>
