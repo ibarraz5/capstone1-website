@@ -1,6 +1,7 @@
 package com.capstone.wea.controller;
 
 import com.capstone.wea.model.cap.CAPMessageModel;
+import com.capstone.wea.model.cap.IPAWSMessageList;
 import com.capstone.wea.model.cmac.*;
 import com.capstone.wea.model.sqlresult.*;
 import com.capstone.wea.model.sqlresult.mappers.*;
@@ -101,6 +102,13 @@ public class WEAController {
 
         URL getIpaws = new URL(ipawsUrl.toString());
 
+        try {
+            XmlMapper mapper = new XmlMapper();
+            IPAWSMessageList model = mapper.readValue(getIpaws, IPAWSMessageList.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         //TODO: parse
 
         return true;
