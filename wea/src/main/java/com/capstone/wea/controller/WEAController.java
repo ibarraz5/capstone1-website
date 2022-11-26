@@ -9,6 +9,7 @@ import com.capstone.wea.parser.XMLParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -88,15 +89,20 @@ public class WEAController {
 
         if (dateTime == null) {
             dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0);
-        } else if (ZonedDateTime.now().minusMinutes(30).isBefore(dateTime)) {
+        } else if (ZonedDateTime.now(Clock.systemUTC()).withNano(0).minusMinutes(30).isAfter(dateTime.withNano(0))) {
             dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0).minusMinutes(30);
+        } else {
+            //drop nanoseconds
+            dateTime = dateTime.withNano(0);
         }
 
         ipawsUrl.append(dateTime.format(DateTimeFormatter.ISO_INSTANT).toString())
                 .append(IPAWS_PIN_PARAMETER);
 
         URL getIpaws = new URL(ipawsUrl.toString());
-        System.out.println(getIpaws.toString());
+
+        //TODO: parse
+
         return true;
     }
 
@@ -343,7 +349,7 @@ public class WEAController {
     public ResponseEntity<Boolean> getIpawsAlerts() {
         Boolean result;
         try {
-            getMessageFromIpaws("", null, "");
+            getMessageFromIpaws("prod", ZonedDateTime.now(Clock.systemUTC()).minusMinutes(40), "public");
             result = true;
         } catch (Exception e) {
             e.printStackTrace();
