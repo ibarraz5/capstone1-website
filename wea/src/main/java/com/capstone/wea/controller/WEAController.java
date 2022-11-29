@@ -27,8 +27,6 @@ import java.net.URL;
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.util.List;
 
 @RequestMapping("/wea")
@@ -45,7 +43,6 @@ public class WEAController {
     private final String PUBLIC_NON_EAS_FEED = "public_non_eas/recent/";
     private final String PUBLIC_FEED = "public/recent/";
     private final String WEA_FEED = "PublicWEA/recent/";
-    //private final DateTimeFormatter ISO_UTC_FORMAT = new DateTimeFormatter
 
     /**
      * Having now worked with C# for a few months, I really miss this method...
