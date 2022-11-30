@@ -3,6 +3,7 @@ package com.capstone.wea.model.cmac;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Text")
@@ -36,5 +37,31 @@ public class CMACMessageAlertText {
 
     public void setLongMessage(String longMessage) {
         this.longMessage = longMessage;
+    }
+
+    public String getShortMessage() {
+        return shortMessage;
+    }
+
+    public String getLongMessage() {
+        return longMessage;
+    }
+
+    public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
+        String fullLanguageName;
+        if (language.equalsIgnoreCase("en-us") || language.equalsIgnoreCase("english")) {
+            fullLanguageName = "English";
+        } else {
+            fullLanguageName = "Spanish";
+        }
+        String query = "INSERT INTO alert_db.cmac_alert_text " +
+                "VALUES (" + messageNumber + ", '" + capIdentifier + "', '" + fullLanguageName + "', '" +
+                shortMessage + "', '" + longMessage + "');";
+
+        if (dbTemplate.update(query) == 0) {
+            return false;
+        }
+
+        return true;
     }
 }

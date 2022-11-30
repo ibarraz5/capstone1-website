@@ -25,6 +25,9 @@ public class CMACMessageAlertInfo {
     @JsonProperty("CMAC_sender_name")
     private String senderName;
 
+    @JsonProperty("CMAC_referenced_message_number")
+    private String referenceNumber;
+
     @JsonProperty("CMAC_Alert_Area")
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<CMACMessageAlertArea> alertAreaList;
@@ -39,6 +42,26 @@ public class CMACMessageAlertInfo {
 
     public String getSenderName() {
         return senderName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getUrgency() {
+        return urgency;
+    }
+
+    public String getCertainty() {
+        return certainty;
+    }
+
+    public String getReferenceNumber() {
+        return referenceNumber;
     }
 
     public void setCategory(String category) {
@@ -73,10 +96,15 @@ public class CMACMessageAlertInfo {
         this.alertTextList = alertTextList;
     }
 
-    public boolean addToDatabase(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
-        //failed to insert an area list, must delete this entry and all added alert areas
-        for (int i = 0; i < alertAreaList.size(); i++) {
-            if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
+    public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
+        for (CMACMessageAlertArea alertArea : alertAreaList) {
+            if (!alertArea.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
+                return false;
+            }
+        }
+
+        for (CMACMessageAlertText alertText : alertTextList) {
+            if (!alertText.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
                 return false;
             }
         }

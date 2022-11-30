@@ -13,6 +13,10 @@ public class CAPGeocodeModel {
     @JsonProperty("value")
     private String value;
 
+    public String getValueName() {
+        return valueName;
+    }
+
     public String getValue() {
         return value;
     }

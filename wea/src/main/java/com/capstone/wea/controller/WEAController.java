@@ -87,7 +87,8 @@ public class WEAController {
 
         if (dateTime == null) {
             dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0);
-        } else if (ZonedDateTime.now(Clock.systemUTC()).withNano(0).minusMinutes(30).isAfter(dateTime.withNano(0))) {
+        } else if (ZonedDateTime.now(Clock.systemUTC()).withNano(0).minusMinutes(30)
+                .isAfter(dateTime.withNano(0))) {
             dateTime = ZonedDateTime.now(Clock.systemUTC()).withNano( 0).minusMinutes(30);
         } else {
             //drop nanoseconds
@@ -99,16 +100,18 @@ public class WEAController {
 
         URL getIpaws = new URL(ipawsUrl.toString());
 
-        try {
-            XmlMapper mapper = new XmlMapper();
-            IPAWSMessageList model = mapper.readValue(getIpaws, IPAWSMessageList.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        //TODO: parse
+        IPAWSMessageList ipawsMessageList = XMLParser.parseIpawsUrlResult(getIpaws);
+        List<CMACMessageModel> cmacMessageList = ipawsMessageList.toCmac();
 
-        return true;
+        //count the number of new messages added to the database
+        int newMessages = 0;
+        for (CMACMessageModel message : cmacMessageList) {
+            if (message.addToDatabase(dbTemplate)) {
+                newMessages++;
+            }
+        }
+
+        return newMessages > 0;
     }
 
     /**
@@ -125,7 +128,7 @@ public class WEAController {
 
         //uncomment to easily add a message to the database when this endpoint is hit
         //requires changing the message number in sameCmacMessage to prevent primary key conflicts
-        //model.addToDatabase(dbTemplate);
+        model.addToDatabase(dbTemplate);
 
         return ResponseEntity.ok(model);
     }
@@ -311,7 +314,7 @@ public class WEAController {
      */
     @GetMapping(value = "/parseCapMessage", produces = "application/xml")
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
-        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
+        CAPMessageModel result = XMLParser.parseSampleCap("src/main/resources/sampleCapMessage.xml");
 
         return ResponseEntity.ok(result);
     }
@@ -327,7 +330,7 @@ public class WEAController {
      */
     @GetMapping(value = "/capToCmac", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> capToCmac() {
-        CAPMessageModel result = XMLParser.parseCAP("src/main/resources/sampleCapMessage.xml");
+        CAPMessageModel result = XMLParser.parseSampleCap("src/main/resources/sampleCapMessage.xml");
 
         CMACMessageModel cmac = result.toCmac();
 

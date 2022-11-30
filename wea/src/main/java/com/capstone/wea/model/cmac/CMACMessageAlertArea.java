@@ -66,19 +66,38 @@ public class CMACMessageAlertArea {
         return geocodeList;
     }
 
-    public boolean addToDatabse(JdbcTemplate dbTemplate, String messageNumber) {
+    public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
         String[] areaNames = areaDescription.split("; ");
 
+        int sameCount = 0;
+        int ugcCount = 0;
+        int startIndex = 0;
+
+        //count SAME vs UGC
+        for (CMACMessageCapGeocode geocode : capGeocodeList) {
+            if (geocode.getName().equalsIgnoreCase("same")) {
+                sameCount++;
+            } else {
+                ugcCount++;
+            }
+        }
+
         //the number of names must equal the number of geocodes
-        if (areaNames.length != geocodeList.size()) {
+        if (sameCount == areaNames.length) {
+            startIndex = 0;
+        } else if (ugcCount == areaNames.length) {
+            startIndex = ugcCount;
+        } else {
             return false;
         }
+
 
         String query;
 
         for (int i = 0; i < areaNames.length; i++) {
             query = "INSERT INTO alert_db.cmac_area_description " +
-                    "VALUES ('" + messageNumber + "', '" + areaNames[i] + "', '" + geocodeList.get(i) + "');";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', '" + areaNames[i] + "', '" +
+                    geocodeList.get(i + ugcCount) + "');";
 
             //failed to insert, remove all prior successful inserts
             if (dbTemplate.update(query) == 0) {
@@ -98,12 +117,13 @@ public class CMACMessageAlertArea {
             BigDecimal[] decCoordinates = new BigDecimal[2];
             String[] coordinates = polyCoordinates[i].split(",");
 
-            //index 1 = lat, index 2 = lon
+            //index 0 = lat, index 1 = lon
             decCoordinates[0] = new BigDecimal(coordinates[0]);
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
             query = "INSERT INTO alert_db.cmac_polygon_coordinates " +
-                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', " + decCoordinates[0] + ", " +
+                    decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 return false;
@@ -127,7 +147,8 @@ public class CMACMessageAlertArea {
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
             query = "INSERT INTO alert_db.cmac_circle_coordinates " +
-                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', " + decCoordinates[0] + ", " +
+                    decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 return false;

@@ -26,8 +26,8 @@ CREATE TABLE `cmac_alert_text` (
   `CMACMessageNumber` int NOT NULL,
   `CMACCapIdentifier` varchar(150) NOT NULL,
   `CMACLanguage` varchar(20) NOT NULL,
-  `CMACShortMessage` varchar(90) NOT NULL,
-  `CMACLongMessage` varchar(360) DEFAULT NULL,
+  `CMACShortMessage` varchar(200) NOT NULL,
+  `CMACLongMessage` varchar(2000) DEFAULT NULL,
   KEY `CMACMessageNumber` (`CMACMessageNumber`,`CMACCapIdentifier`),
   CONSTRAINT `cmac_alert_text_ibfk_1` FOREIGN KEY (`CMACMessageNumber`, `CMACCapIdentifier`) REFERENCES `cmac_message` (`CMACMessageNumber`, `CMACCapIdentifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -54,7 +54,7 @@ CREATE TABLE `cmac_area_description` (
   `CMACMessageNumber` int NOT NULL,
   `CMACCapIdentifier` varchar(150) NOT NULL,
   `AreaName` varchar(150) NOT NULL,
-  `CMASGeocode` int NOT NULL,
+  `CMASGeocode` varchar(20) NOT NULL,
   KEY `CMACMessageNumber` (`CMACMessageNumber`,`CMACCapIdentifier`),
   CONSTRAINT `cmac_area_description_ibfk_1` FOREIGN KEY (`CMACMessageNumber`, `CMACCapIdentifier`) REFERENCES `cmac_message` (`CMACMessageNumber`, `CMACCapIdentifier`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

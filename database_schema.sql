@@ -38,7 +38,7 @@ CREATE TABLE cmac_area_description (
     CMACMessageNumber INT NOT NULL,
     CMACCapIdentifier VARCHAR(150) NOT NULL,
     AreaName VARCHAR(150) NOT NULL,
-    CMASGeocode INT NOT NULL,
+    CMASGeocode VARCHAR(20) NOT NULL,
     FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
 
@@ -46,8 +46,8 @@ CREATE TABLE cmac_alert_text (
 	CMACMessageNumber INT NOT NULL,
     CMACCapIdentifier VARCHAR(150) NOT NULL,
     CMACLanguage VARCHAR(20) NOT NULL,
-    CMACShortMessage VARCHAR(90) NOT NULL,
-    CMACLongMessage VARCHAR(360),
+    CMACShortMessage VARCHAR(200) NOT NULL,
+    CMACLongMessage VARCHAR(2000),
 	FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
 

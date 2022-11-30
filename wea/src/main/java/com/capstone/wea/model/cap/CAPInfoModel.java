@@ -62,27 +62,16 @@ public class CAPInfoModel {
         }
         cmac.setAlertAreaList(cmacArea);
 
-        /*
-         * TODO: this is the main reason I need IPAWS access
-         * The current CAP model I have to work with does not
-         * support the following:
-         *
-         * multiple alert texts
-         * non-english alerts
-         * long vs short descriptions (unless headline == short?? this is unclear)
-         *
-         * Without real messages/and up-to-date schema, CAP
-         * to CMAC conversion cannot truly be compleated
-         * (mush to the dismay of the Phyrexians)
-         */
         List<CMACMessageAlertText> cmacText = new ArrayList<>();
 
         cmacText.add(new CMACMessageAlertText());
         cmacText.get(0).setLanguage("English");
-        cmacText.get(0).setShortLength(headline.length());
-        cmacText.get(0).setShortMessage(headline);
-        cmacText.get(0).setLongLength(description.length());
-        cmacText.get(0).setLongMessage(description);
+        cmacText.get(0).setShortMessage(headline.replace("\n", " "));
+        cmacText.get(0).setShortLength(cmacText.get(0).getShortMessage().length());
+        cmacText.get(0).setLongMessage(description.replace("\n", " "));
+        cmacText.get(0).setLongLength(cmacText.get(0).getLongMessage().length());
+
+        cmac.setAlertTextList(cmacText);
 
         return cmac;
     }

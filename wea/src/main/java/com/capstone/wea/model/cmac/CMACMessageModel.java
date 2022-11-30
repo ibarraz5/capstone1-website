@@ -99,20 +99,29 @@ public class CMACMessageModel {
      * was not
      */
     public boolean addToDatabase(JdbcTemplate dbTemplate) {
+        String referenceNumber = alertInfo.getReferenceNumber() == null ?
+                "NULL" : "'" + alertInfo.getReferenceNumber() + "'";
         String query = "INSERT INTO alert_db.cmac_message " +
-                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" +
-                sentDateTime.replace("Z", "") + "', " + "'" + messageType + "', '" +
-                alertInfo.getSenderName() + "', '" + alertInfo.getExpires().replace("Z", "") + "');";
+                "VALUES (NULL, '" + capIdentifier + "', '" + sender + "', '" +
+                sentDateTime.replace("Z", "") + "', '" + status + "', '" + messageType + "', '" +
+                alertInfo.getSenderName() + "', '" + alertInfo.getExpires().replace("Z", "") + "', '" +
+                alertInfo.getCategory() + "', '" + alertInfo.getSeverity() + "', '" + alertInfo.getUrgency() + "', '" +
+                alertInfo.getCertainty() + "', " + referenceNumber + ");";
 
         System.out.println(query);
 
+        int messageNumberInt;
         //failed to insert
         if (dbTemplate.update(query) == 0) {
             return false;
+        } else {
+            messageNumberInt = dbTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
         }
 
+        messageNumber = String.format("%08X", messageNumberInt);
+
         //If another part of this message fails to insert, delete all entries for this message in all tables
-        if (!alertInfo.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
+        if (!alertInfo.addToDatabase(dbTemplate, messageNumberInt, capIdentifier)) {
             removeFromDatabase(dbTemplate);
             return false;
         }
@@ -121,23 +130,30 @@ public class CMACMessageModel {
     }
 
     private void removeFromDatabase(JdbcTemplate dbTemplate) {
+        int msgNum = Integer.parseInt(messageNumber, 16);
+
         String query = "DELETE FROM alert_db.cmac_circle_coordinates " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_polygon_coordinates " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_area_description " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
+
+        dbTemplate.update(query);
+
+        query = "DELETE FROM alert_db.cmac_alert_text " +
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_message " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
     }

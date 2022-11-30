@@ -24,7 +24,7 @@ public class CAPAreaModel {
     public CMACMessageAlertArea toCmac() {
         CMACMessageAlertArea cmac = new CMACMessageAlertArea();
 
-        cmac.setAreaDescription(areaDesc.replace(",", ";"));
+        cmac.setAreaDescription(areaDesc);
         cmac.setPolygon(polygon);
         cmac.setCircle("");
 
