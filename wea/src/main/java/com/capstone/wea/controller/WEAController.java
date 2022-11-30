@@ -10,7 +10,6 @@ import com.capstone.wea.parser.XMLParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -124,11 +123,19 @@ public class WEAController {
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
-        CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
+        //CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
+
+        String query = "SELECT CMACMessageNumber, CMACCapIdentifier " +
+                "FROM alert_db.cmac_message " +
+                "WHERE CMACExpiresDateTime > NOW() " +
+                "ORDER BY CMACDateTime DESC " +
+                "LIMIT 1;";
+
+        List<String> oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
 
         //uncomment to easily add a message to the database when this endpoint is hit
         //requires changing the message number in sameCmacMessage to prevent primary key conflicts
-        model.addToDatabase(dbTemplate);
+        //model.addToDatabase(dbTemplate);
 
         return ResponseEntity.ok(model);
     }
@@ -285,10 +292,10 @@ public class WEAController {
 
         //override default exception response to avoid showing stacktrace, which may contain table names
         List<MessageStatsResult> resultList;
-        String commoneName;
+        String commonName;
         try {
             resultList = dbTemplate.query(query.toString(), new StatsResultsMapper());
-            commoneName = dbTemplate.queryForObject(nameQuery, String.class);
+            commonName = dbTemplate.queryForObject(nameQuery, String.class);
         } catch (BadSqlGrammarException e) {
             e.printStackTrace();
             throw new InternalError("Bad SQL Grammar");
@@ -297,7 +304,7 @@ public class WEAController {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode root = mapper.createObjectNode();
         root.set("messageStats", mapper.valueToTree(resultList.subList(0, Math.min(resultList.size(), 9))));
-        root.set("commonName", mapper.valueToTree(commoneName));
+        root.set("commonName", mapper.valueToTree(commonName));
         root.set("prev", BooleanNode.valueOf(page > 1));
         root.set("next", BooleanNode.valueOf(resultList.size() > 9));
 

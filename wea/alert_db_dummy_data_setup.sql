@@ -53,7 +53,7 @@ DROP TABLE IF EXISTS `cmac_area_description`;
 CREATE TABLE `cmac_area_description` (
   `CMACMessageNumber` int NOT NULL,
   `CMACCapIdentifier` varchar(150) NOT NULL,
-  `AreaName` varchar(150) NOT NULL,
+  `AreaName` varchar(500) NOT NULL,
   `CMASGeocode` varchar(20) NOT NULL,
   KEY `CMACMessageNumber` (`CMACMessageNumber`,`CMACCapIdentifier`),
   CONSTRAINT `cmac_area_description_ibfk_1` FOREIGN KEY (`CMACMessageNumber`, `CMACCapIdentifier`) REFERENCES `cmac_message` (`CMACMessageNumber`, `CMACCapIdentifier`)

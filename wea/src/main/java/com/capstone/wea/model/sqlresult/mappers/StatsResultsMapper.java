@@ -7,9 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public final class StatsResultsMapper implements RowMapper<MessageStatsResult> {
-    private MessageStatsResult result;
     public StatsResultsMapper() {
-
     }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {

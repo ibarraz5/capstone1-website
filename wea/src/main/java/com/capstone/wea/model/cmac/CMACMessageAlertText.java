@@ -56,7 +56,7 @@ public class CMACMessageAlertText {
         }
         String query = "INSERT INTO alert_db.cmac_alert_text " +
                 "VALUES (" + messageNumber + ", '" + capIdentifier + "', '" + fullLanguageName + "', '" +
-                shortMessage + "', '" + longMessage + "');";
+                shortMessage + "', '" + longMessage.replace("'", "\\'") + "');";
 
         if (dbTemplate.update(query) == 0) {
             return false;

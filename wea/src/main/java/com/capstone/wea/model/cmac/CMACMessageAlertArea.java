@@ -86,7 +86,7 @@ public class CMACMessageAlertArea {
         if (sameCount == areaNames.length) {
             startIndex = 0;
         } else if (ugcCount == areaNames.length) {
-            startIndex = ugcCount;
+            startIndex = sameCount;
         } else {
             return false;
         }
@@ -97,7 +97,7 @@ public class CMACMessageAlertArea {
         for (int i = 0; i < areaNames.length; i++) {
             query = "INSERT INTO alert_db.cmac_area_description " +
                     "VALUES (" + messageNumber + ", '" + capIdentifier + "', '" + areaNames[i] + "', '" +
-                    geocodeList.get(i + ugcCount) + "');";
+                    geocodeList.get(i + startIndex) + "');";
 
             //failed to insert, remove all prior successful inserts
             if (dbTemplate.update(query) == 0) {

@@ -37,7 +37,7 @@ CREATE TABLE cmac_circle_coordinates (
 CREATE TABLE cmac_area_description (
     CMACMessageNumber INT NOT NULL,
     CMACCapIdentifier VARCHAR(150) NOT NULL,
-    AreaName VARCHAR(150) NOT NULL,
+    AreaName VARCHAR(500) NOT NULL,
     CMASGeocode VARCHAR(20) NOT NULL,
     FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
