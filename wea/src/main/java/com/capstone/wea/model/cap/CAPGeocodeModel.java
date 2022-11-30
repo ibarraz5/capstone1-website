@@ -1,6 +1,6 @@
 package com.capstone.wea.model.cap;
 
-import com.capstone.wea.model.cmac.CMACMessageCapGeocode;
+import com.capstone.wea.model.cmac.CMACCapGeocodeModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -21,8 +21,8 @@ public class CAPGeocodeModel {
         return value;
     }
 
-    public CMACMessageCapGeocode toCmac() {
-        CMACMessageCapGeocode cmac = new CMACMessageCapGeocode();
+    public CMACCapGeocodeModel toCmac() {
+        CMACCapGeocodeModel cmac = new CMACCapGeocodeModel();
 
         cmac.setName(valueName);
         cmac.setValue(value);

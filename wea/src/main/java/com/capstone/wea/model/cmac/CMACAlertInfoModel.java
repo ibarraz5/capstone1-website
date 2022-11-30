@@ -6,11 +6,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_alert_info")
-public class CMACMessageAlertInfo {
+public class CMACAlertInfoModel {
     @JsonProperty("CMAC_category")
     private String category;
     @JsonProperty("CMAC_severity")
@@ -30,11 +31,11 @@ public class CMACMessageAlertInfo {
 
     @JsonProperty("CMAC_Alert_Area")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageAlertArea> alertAreaList;
+    private List<CMACAlertAreaModel> alertAreaList;
 
     @JsonProperty("CMAC_Alert_Text")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageAlertText> alertTextList;
+    private List<CMACAlertTextModel> alertTextList;
 
     public String getExpires() {
         return expires;
@@ -68,6 +69,10 @@ public class CMACMessageAlertInfo {
         this.category = category;
     }
 
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
+    }
+
     public void setSeverity(String severity) {
         this.severity = severity;
     }
@@ -88,22 +93,40 @@ public class CMACMessageAlertInfo {
         this.senderName = senderName;
     }
 
-    public void setAlertAreaList(List<CMACMessageAlertArea> alertAreaList) {
+    public void setAlertAreaList(List<CMACAlertAreaModel> alertAreaList) {
         this.alertAreaList = alertAreaList;
     }
 
-    public void setAlertTextList(List<CMACMessageAlertText> alertTextList) {
+    public void setAlertAreaListString(List<List<String>> alertAreaList) {
+        if (this.alertAreaList == null) {
+            //this.alertAreaList = new ArrayList<>();
+        }
+
+
+        /*for (List<String> area : alertAreaList) {
+            String areaNames = "";
+            CMACAlertAreaModel areaModel = new CMACAlertAreaModel();
+
+
+                //areaNames += areaDescription
+
+            //areaModel
+            alertAreaList.add(area);
+        }*/
+    }
+
+    public void setAlertTextList(List<CMACAlertTextModel> alertTextList) {
         this.alertTextList = alertTextList;
     }
 
     public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
-        for (CMACMessageAlertArea alertArea : alertAreaList) {
+        for (CMACAlertAreaModel alertArea : alertAreaList) {
             if (!alertArea.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
                 return false;
             }
         }
 
-        for (CMACMessageAlertText alertText : alertTextList) {
+        for (CMACAlertTextModel alertText : alertTextList) {
             if (!alertText.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
                 return false;
             }

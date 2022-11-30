@@ -21,7 +21,7 @@ public class OldestNotExpiredMapper implements RowMapper<List<String>> {
     public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
         List<String> result = new ArrayList<>();
 
-        result.add(Integer.toString(rs.getInt("CMACMessageNumber")));
+        result.add(rs.getString("CMACMessageNumber"));
         result.add(rs.getString("CMACCapIdentifier"));
 
         return result;

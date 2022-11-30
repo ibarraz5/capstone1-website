@@ -13,7 +13,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Area")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class CMACMessageAlertArea {
+public class CMACAlertAreaModel {
     @JsonProperty("CMAC_area_description")
     private String areaDescription;
 
@@ -28,7 +28,7 @@ public class CMACMessageAlertArea {
     private List<String> geocodeList;
     @JsonProperty("CMAC_cap_geocode")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageCapGeocode> capGeocodeList;
+    private List<CMACCapGeocodeModel> capGeocodeList;
 
     public void setAreaDescription(String areaDescription) {
         this.areaDescription = areaDescription;
@@ -46,7 +46,7 @@ public class CMACMessageAlertArea {
         this.geocodeList = geocodeList;
     }
 
-    public void setCapGeocodeList(List<CMACMessageCapGeocode> capGeocodeList) {
+    public void setCapGeocodeList(List<CMACCapGeocodeModel> capGeocodeList) {
         this.capGeocodeList = capGeocodeList;
     }
 
@@ -74,7 +74,7 @@ public class CMACMessageAlertArea {
         int startIndex = 0;
 
         //count SAME vs UGC
-        for (CMACMessageCapGeocode geocode : capGeocodeList) {
+        for (CMACCapGeocodeModel geocode : capGeocodeList) {
             if (geocode.getName().equalsIgnoreCase("same")) {
                 sameCount++;
             } else {

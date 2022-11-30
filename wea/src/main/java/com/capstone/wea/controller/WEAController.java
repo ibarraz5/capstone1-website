@@ -131,13 +131,67 @@ public class WEAController {
                 "ORDER BY CMACDateTime DESC " +
                 "LIMIT 1;";
 
-        List<String> oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+        //first check for oldest non-expired messages in database
+        List<String> oldestEntry;
+
+        oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+
+        //if no message is found, query ipaws for more messages
+        if (oldestEntry.isEmpty()) {
+            Boolean newMessages;
+            try {
+                newMessages = getMessageFromIpaws("prod", ZonedDateTime.now(Clock.systemUTC()).minusMinutes(40), "public");
+            } catch (Exception e) {
+                e.printStackTrace();
+                newMessages = false;
+            }
+
+            //if there are no new messages from IPAWS, or if an error was encountered, return 404 not found
+            if (!newMessages) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No new messages found");
+            } else {
+                oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+            }
+        }
+
+        //Begin building message
+        query = "SELECT * " +
+                "FROM alert_db.cmac_message " +
+                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
+                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+
+        CMACMessageModel result = dbTemplate.queryForObject(query, new CMACMessageMapper());
+
+        query = "SELECT AreaName, CMASGeocode " +
+                "FROM alert_db.cmac_area_description " +
+                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
+                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+
+        List<List<String>> areaList = dbTemplate.query(query, new CMACAlertAreaMapper());
+
+        result.addAlertAreaListString(areaList);
+
+        query = "SELECT Language, CMACShortMessage, CMACLongMessage " +
+                "FROM alert_db.cmac_alert_text " +
+                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
+                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+
+        //List<CMACAlertTextModel> textList = dbTemplate.query(query, new CMACAlertTextMapper());
+        //result.addAlertTextList(textList);
+
+        query = "SELECT Language, CMACShortMessage, CMACLongMessage " +
+                "FROM alert_db.cmac_alert_text " +
+                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
+                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+
+        //List<CMACAlertTextModel> textList = dbTemplate.query(query, new CMACAlertTextMapper());
+        //result.addAlertTextList(textList);
 
         //uncomment to easily add a message to the database when this endpoint is hit
         //requires changing the message number in sameCmacMessage to prevent primary key conflicts
         //model.addToDatabase(dbTemplate);
 
-        return ResponseEntity.ok(model);
+        return ResponseEntity.ok(result);
     }
 
     /**

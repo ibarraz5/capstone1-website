@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Text")
-public class CMACMessageAlertText {
+public class CMACAlertTextModel {
     @JsonProperty("CMAC_text_language")
     private String language;
     @JsonProperty("CMAC_short_text_alert_message_length")
@@ -29,6 +29,7 @@ public class CMACMessageAlertText {
 
     public void setShortMessage(String shortMessage) {
         this.shortMessage = shortMessage;
+        shortLength = this.shortMessage.length();
     }
 
     public void setLongLength(int longLength) {
@@ -37,6 +38,7 @@ public class CMACMessageAlertText {
 
     public void setLongMessage(String longMessage) {
         this.longMessage = longMessage;
+        longLength = this.longMessage.length();
     }
 
     public String getShortMessage() {

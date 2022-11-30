@@ -12,7 +12,7 @@ CREATE TABLE cmac_message (
     CMACExpiresDateTime DATETIME NOT NULL,
     CMACCategory VARCHAR(20) NOT NULL,
     CMACSeverity VARCHAR(20) NOT NULL,
-    CMACUgrency VARCHAR(20) NOT NULL,
+    CMACUrgency VARCHAR(20) NOT NULL,
     CMACCertainty VARCHAR(20) NOT NULL,
     CMACReferencedCapIdentifier VARCHAR(180),
     CONSTRAINT PK_CMACMessage PRIMARY KEY (CMACMessageNumber, CMACCapIdentifier)

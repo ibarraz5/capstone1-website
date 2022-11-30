@@ -1,10 +1,13 @@
 package com.capstone.wea.model.cmac;
 
+import com.capstone.wea.model.sqlresult.mappers.CMACAlertAreaMapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
@@ -40,7 +43,7 @@ public class CMACMessageModel {
     private String capSentDateTime;
 
     @JsonProperty("CMAC_alert_info")
-    private CMACMessageAlertInfo alertInfo;
+    private CMACAlertInfoModel alertInfo;
 
     public void setXmlns(String xmlns) {
         this.xmlns = xmlns;
@@ -86,8 +89,20 @@ public class CMACMessageModel {
         this.capSentDateTime = capSentDateTime;
     }
 
-    public void setAlertInfo(CMACMessageAlertInfo alertInfo) {
+    public void setAlertInfo(CMACAlertInfoModel alertInfo) {
         this.alertInfo = alertInfo;
+    }
+
+    public void addAlertAreaList(List<CMACAlertAreaModel> alertAreaList) {
+        alertInfo.setAlertAreaList(alertAreaList);
+    }
+
+    public void addAlertAreaListString(List<List<String>> alertAreaList) {
+        alertInfo.setAlertAreaListString(alertAreaList);
+    }
+
+    public void addAlertTextList(List<CMACAlertTextModel> alertTextList) {
+        alertInfo.setAlertTextList(alertTextList);
     }
 
     /**

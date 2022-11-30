@@ -114,7 +114,7 @@ CREATE TABLE `cmac_message` (
   `CMACExpiresDateTime` datetime NOT NULL,
   `CMACCategory` varchar(20) NOT NULL,
   `CMACSeverity` varchar(20) NOT NULL,
-  `CMACUgrency` varchar(20) NOT NULL,
+  `CMACUrgency` varchar(20) NOT NULL,
   `CMACCertainty` varchar(20) NOT NULL,
   `CMACReferencedCapIdentifier` varchar(180) DEFAULT NULL,
   PRIMARY KEY (`CMACMessageNumber`,`CMACCapIdentifier`)

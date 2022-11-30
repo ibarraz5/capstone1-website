@@ -1,32 +1,36 @@
 package com.capstone.wea.model.sqlresult.mappers;
 
-import com.capstone.wea.model.cmac.CollectedDeviceData;
+import com.capstone.wea.model.cmac.CMACAlertInfoModel;
+import com.capstone.wea.model.cmac.CMACMessageModel;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-public class CMACMessageMapper implements RowMapper<CMACMessageMapper> {
+public class CMACMessageMapper implements RowMapper<CMACMessageModel> {
     @Override
-    public CMACMessageMapper mapRow(ResultSet rs, int rowNum) throws SQLException {
-        CMACMessageMapper result = new CMACMessageMapper();
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public CMACMessageModel mapRow(ResultSet rs, int rowNum) throws SQLException {
+        CMACMessageModel message = new CMACMessageModel();
 
-        /*
-        result.setMessageNumber(rs.getString("CMACMessageNumber"));
-        result.setUploadId(rs.getInt("UploadID"));
-        result.setLocationReceived(rs.getString("LocationReceived"));
-        result.setLocationDisplayed(rs.getString("LocationDisplayed"));
-        result.setTimeReceived(LocalDateTime.parse(rs.getString("TimeReceived"), format));
-        result.setTimeDisplayed(LocalDateTime.parse(rs.getString("TimeDisplayed"), format));
-        result.setReceivedOutsideArea(rs.getBoolean("ReceivedOutsideArea"));
-        result.setDisplayedOutsideArea(rs.getBoolean("DisplayedOutsideArea"));
-        result.setReceivedAfterExpired(rs.getBoolean("ReceivedAfterExpired"));
-        result.setDisplayedAfterExpired(rs.getBoolean("DisplayedAfterExpired"));
-        */
+        message.setMessageNumber(rs.getString("CMACMessageNumber"));
+        message.setCapIdentifier(rs.getString("CMACCapIdentifier"));
+        message.setSender(rs.getString("CMACSender"));
+        message.setSentDateTime(rs.getString("CMACDateTime").replace(" " , "T") + "Z");
+        message.setStatus(rs.getString("CMACStatus"));
+        message.setMessageType(rs.getString("CMACMessageType"));
 
-        return result;
+        CMACAlertInfoModel alertInfo = new CMACAlertInfoModel();
+
+        alertInfo.setSenderName(rs.getString("CMACSenderName"));
+        alertInfo.setExpires(rs.getString("CMACExpiresDateTime").replace(" " , "T") + "Z");
+        alertInfo.setCategory(rs.getString("CMACCategory"));
+        alertInfo.setSeverity(rs.getString("CMACSeverity"));
+        alertInfo.setUrgency(rs.getString("CMACUrgency"));
+        alertInfo.setCertainty(rs.getString("CMACCertainty"));
+        alertInfo.setReferenceNumber(rs.getString("CMACReferencedCapIdentifier"));
+
+        message.setAlertInfo(alertInfo);
+
+        return message;
     }
 }
