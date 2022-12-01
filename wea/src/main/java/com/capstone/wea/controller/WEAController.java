@@ -247,11 +247,12 @@ public class WEAController {
      */
     @PutMapping(value = "upload")
     public ResponseEntity<String> upload(@RequestBody CollectedDeviceData userData) {
-        String query = "INSERT INTO alert_db.device_upload_data VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
-                "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
-                userData.getTimeReceived() + "', '" + userData.getTimeDisplayed() + "', " +
-                userData.isReceivedOutsideArea() + ", " + userData.isDisplayedOutsideArea() + ", " +
-                userData.isReceivedAfterExpired() + ", " + userData.isDisplayedAfterExpired() + ");";
+        String query = "INSERT INTO alert_db.device_upload_data VALUES('" + userData.getMessageNumber() + "', '" +
+                userData.getCapIdentifier() + "', NULL , NULL, NULL, NULL, '" + userData.getLocationReceived() +
+                "', '" + userData.getLocationDisplayed() + "', '" + userData.getTimeReceived() + "', '" +
+                userData.getTimeDisplayed() + "', " + userData.isReceivedOutsideArea() + ", " +
+                userData.isDisplayedOutsideArea() + ", " + userData.isReceivedAfterExpired() + ", " +
+                userData.isDisplayedAfterExpired() + ");";
         dbTemplate.update(query);
 
         //gets the UploadID of the most recently inserted row
