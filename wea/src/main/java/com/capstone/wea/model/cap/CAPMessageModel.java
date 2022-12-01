@@ -40,9 +40,7 @@ public class CAPMessageModel {
         cmac.setMessageType(msgType);
         //TODO: Hmm.. This is the endpoint to find this specific message. Should this lead back to us or to IPAWS?
         //if so, sendingGatewayId needs changed to match our uri as well
-        cmac.setAlertUri("");
         cmac.setCapIdentifier(identifier);
-        cmac.setCapSentDateTime(sent);
         cmac.setAlertInfo(info.toCmac());
 
         return cmac;

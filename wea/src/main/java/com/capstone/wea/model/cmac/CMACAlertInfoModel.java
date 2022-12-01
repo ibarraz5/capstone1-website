@@ -97,24 +97,6 @@ public class CMACAlertInfoModel {
         this.alertAreaList = alertAreaList;
     }
 
-    public void setAlertAreaListString(List<List<String>> alertAreaList) {
-        if (this.alertAreaList == null) {
-            //this.alertAreaList = new ArrayList<>();
-        }
-
-
-        /*for (List<String> area : alertAreaList) {
-            String areaNames = "";
-            CMACAlertAreaModel areaModel = new CMACAlertAreaModel();
-
-
-                //areaNames += areaDescription
-
-            //areaModel
-            alertAreaList.add(area);
-        }*/
-    }
-
     public void setAlertTextList(List<CMACAlertTextModel> alertTextList) {
         this.alertTextList = alertTextList;
     }

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/wea")
@@ -42,6 +44,15 @@ public class WEAController {
     private final String PUBLIC_NON_EAS_FEED = "public_non_eas/recent/";
     private final String PUBLIC_FEED = "public/recent/";
     private final String WEA_FEED = "PublicWEA/recent/";
+
+    //TODO: this class is becoming bloated with long methods and the need for helper methods to reduce duplicate code.
+    // create DatabaseQuery or DatabaseHelper class with methods capable of querying for any type
+    // (ex: public static <T> T queryForSingleObject(String query, Class<T> returnType, Class<R> rowMapper) {...}
+    // can also use some more specific methods such as the messageList query. Util package is probably best place for
+    // it, parser can moved to Util package as well
+
+    //TODO: switch to stored procedures because apparently anything and everything can contain "'" and I'm getting
+    // tired of it
 
     /**
      * Having now worked with C# for a few months, I really miss this method...
@@ -123,26 +134,24 @@ public class WEAController {
      */
     @GetMapping(value = "/getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
-        //CMACMessageModel model = XMLParser.parseCMAC("src/main/resources/sampleCmacMessage.xml");
-
+        //first check for oldest non-expired messages in database
         String query = "SELECT CMACMessageNumber, CMACCapIdentifier " +
                 "FROM alert_db.cmac_message " +
                 "WHERE CMACExpiresDateTime > NOW() " +
                 "ORDER BY CMACDateTime DESC " +
                 "LIMIT 1;";
 
-        //first check for oldest non-expired messages in database
         List<String> oldestEntry;
 
-        oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
-
-        //if no message is found, query ipaws for more messages
-        if (oldestEntry.isEmpty()) {
+        try {
+            oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+        } catch (EmptyResultDataAccessException e) {
+            //no results found
             Boolean newMessages;
             try {
                 newMessages = getMessageFromIpaws("prod", ZonedDateTime.now(Clock.systemUTC()).minusMinutes(40), "public");
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
                 newMessages = false;
             }
 
@@ -150,18 +159,39 @@ public class WEAController {
             if (!newMessages) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No new messages found");
             } else {
-                oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+                //otherwise get the oldest message just added to the database
+                try {
+                    oldestEntry = dbTemplate.queryForObject(query, new OldestNotExpiredMapper());
+                } catch (EmptyResultDataAccessException exe) {
+                    //precaution on the off chance that an inserted message expires in the short amount of time
+                    // between being added to the database and the query being executed
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No new messages found");
+                }
             }
         }
 
-        //Begin building message
+        //Get CMAC Message and AlertInfo data
         query = "SELECT * " +
                 "FROM alert_db.cmac_message " +
                 "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
                 "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
 
-        CMACMessageModel result = dbTemplate.queryForObject(query, new CMACMessageMapper());
+        CMACMessageModel resultMessage = dbTemplate.queryForObject(query, new CMACMessageMapper());
 
+        //TODO: just realized that we never set up the database to support the fact that there can be more than one
+        // alert_area. db/model must be updated to give alert areas a unique id, polygon/circle will need updated to
+        // referenced this id as well
+
+        //Get CMAC AlertText data
+        query = "SELECT CMACLanguage, CMACShortMessage, CMACLongMessage " +
+                "FROM alert_db.cmac_alert_text " +
+                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
+                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+
+        List<CMACAlertTextModel> textList = dbTemplate.query(query, new CMACAlertTextMapper());
+        resultMessage.addAlertTextList(textList);
+
+        //Get CMAC AlertArea data
         query = "SELECT AreaName, CMASGeocode " +
                 "FROM alert_db.cmac_area_description " +
                 "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
@@ -169,29 +199,36 @@ public class WEAController {
 
         List<List<String>> areaList = dbTemplate.query(query, new CMACAlertAreaMapper());
 
-        result.addAlertAreaListString(areaList);
+        List<CMACAlertAreaModel>  cmacAreaList = new ArrayList<>(areaList.size());
+        cmacAreaList.add(new CMACAlertAreaModel());
 
-        query = "SELECT Language, CMACShortMessage, CMACLongMessage " +
-                "FROM alert_db.cmac_alert_text " +
+        for (List<String> area: areaList) {
+            cmacAreaList.get(0).addArea(area.get(0), area.get(1));
+        }
+
+        //polygon coordinates
+        query = "SELECT Latitude, Longitude " +
+                "FROM alert_db.cmac_polygon_coordinates " +
                 "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
                 "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
 
-        //List<CMACAlertTextModel> textList = dbTemplate.query(query, new CMACAlertTextMapper());
-        //result.addAlertTextList(textList);
+        List<String> polyCoordList = dbTemplate.query(query, new PolygonCoordinatesMapper());
 
-        query = "SELECT Language, CMACShortMessage, CMACLongMessage " +
-                "FROM alert_db.cmac_alert_text " +
-                "WHERE CMACMessageNumber = " + oldestEntry.get(0) + " " +
-                "AND CMACCapIdentifier = '" + oldestEntry.get(1) + "';";
+        StringBuilder polygon = new StringBuilder();
+        for (String polyPair : polyCoordList) {
+            if (!polygon.toString().isBlank()) {
+                polygon.append(",").append(polyPair);
+            } else {
+                polygon.append(polyPair);
+            }
+        }
 
-        //List<CMACAlertTextModel> textList = dbTemplate.query(query, new CMACAlertTextMapper());
-        //result.addAlertTextList(textList);
+        System.out.println("polygon: " + polygon);
+        cmacAreaList.get(0).setPolygon(String.valueOf(polygon));
 
-        //uncomment to easily add a message to the database when this endpoint is hit
-        //requires changing the message number in sameCmacMessage to prevent primary key conflicts
-        //model.addToDatabase(dbTemplate);
+        resultMessage.addAlertAreaList(cmacAreaList);
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(resultMessage);
     }
 
     /**

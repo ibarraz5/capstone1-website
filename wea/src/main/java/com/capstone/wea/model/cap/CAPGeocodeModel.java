@@ -22,10 +22,7 @@ public class CAPGeocodeModel {
     }
 
     public CMACCapGeocodeModel toCmac() {
-        CMACCapGeocodeModel cmac = new CMACCapGeocodeModel();
-
-        cmac.setName(valueName);
-        cmac.setValue(value);
+        CMACCapGeocodeModel cmac = new CMACCapGeocodeModel(valueName, value);
 
         return cmac;
     }

@@ -12,7 +12,8 @@ public class CMACMessageMapper implements RowMapper<CMACMessageModel> {
     public CMACMessageModel mapRow(ResultSet rs, int rowNum) throws SQLException {
         CMACMessageModel message = new CMACMessageModel();
 
-        message.setMessageNumber(rs.getString("CMACMessageNumber"));
+
+        message.setMessageNumber(String.format("%08X", rs.getInt("CMACMessageNumber")));
         message.setCapIdentifier(rs.getString("CMACCapIdentifier"));
         message.setSender(rs.getString("CMACSender"));
         message.setSentDateTime(rs.getString("CMACDateTime").replace(" " , "T") + "Z");

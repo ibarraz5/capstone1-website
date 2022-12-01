@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -64,6 +65,26 @@ public class CMACAlertAreaModel {
 
     public List<String> getGeocodeList() {
         return geocodeList;
+    }
+
+    public void addArea(String areaDescription, String geocode) {
+        if (this.areaDescription != null) {
+            this.areaDescription += "; " + areaDescription;
+        } else {
+            this.areaDescription = areaDescription;
+        }
+
+        if (capGeocodeList == null) {
+            capGeocodeList = new ArrayList<>();
+        }
+
+        capGeocodeList.add(new CMACCapGeocodeModel("SAME", geocode));
+
+        if (geocodeList == null) {
+            geocodeList = new ArrayList<>();
+        }
+
+        geocodeList.add(geocode);
     }
 
     public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {

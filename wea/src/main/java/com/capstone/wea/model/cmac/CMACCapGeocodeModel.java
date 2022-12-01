@@ -12,6 +12,11 @@ public class CMACCapGeocodeModel {
     @JsonProperty("value")
     private String value;
 
+    public CMACCapGeocodeModel(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

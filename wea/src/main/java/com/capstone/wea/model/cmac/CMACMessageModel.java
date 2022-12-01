@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
@@ -67,6 +68,7 @@ public class CMACMessageModel {
 
     public void setSentDateTime(String sentDateTime) {
         this.sentDateTime = sentDateTime;
+        capSentDateTime = sentDateTime;
     }
 
     public void setStatus(String status) {
@@ -77,16 +79,12 @@ public class CMACMessageModel {
         this.messageType = messageType;
     }
 
-    public void setAlertUri(String alertUri) {
-        this.alertUri = alertUri;
+    public void setAlertUri() {
+        alertUri = "http://localhost:8080/wea/getMessage" + messageNumber;
     }
 
     public void setCapIdentifier(String capIdentifier) {
         this.capIdentifier = capIdentifier;
-    }
-
-    public void setCapSentDateTime(String capSentDateTime) {
-        this.capSentDateTime = capSentDateTime;
     }
 
     public void setAlertInfo(CMACAlertInfoModel alertInfo) {
@@ -95,10 +93,6 @@ public class CMACMessageModel {
 
     public void addAlertAreaList(List<CMACAlertAreaModel> alertAreaList) {
         alertInfo.setAlertAreaList(alertAreaList);
-    }
-
-    public void addAlertAreaListString(List<List<String>> alertAreaList) {
-        alertInfo.setAlertAreaListString(alertAreaList);
     }
 
     public void addAlertTextList(List<CMACAlertTextModel> alertTextList) {
@@ -125,21 +119,29 @@ public class CMACMessageModel {
 
         System.out.println(query);
 
-        int messageNumberInt;
-        //failed to insert
-        if (dbTemplate.update(query) == 0) {
-            return false;
-        } else {
-            messageNumberInt = dbTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-        }
+        //TODO: cap identifier should be the sole primary key so that attempts to insert a duplicate from IPAWS will
+        // fail. Also only add messages of type Test, Alert, and Update
+        try {
+            int messageNumberInt;
+            //failed to insert
+            if (dbTemplate.update(query) == 0) {
+                return false;
+            } else {
+                messageNumberInt = dbTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+            }
 
-        messageNumber = String.format("%08X", messageNumberInt);
+            messageNumber = String.format("%08X", messageNumberInt);
 
-        //If another part of this message fails to insert, delete all entries for this message in all tables
-        if (!alertInfo.addToDatabase(dbTemplate, messageNumberInt, capIdentifier)) {
+            //If another part of this message fails to insert, delete all entries for this message in all tables
+            if (!alertInfo.addToDatabase(dbTemplate, messageNumberInt, capIdentifier)) {
+                removeFromDatabase(dbTemplate);
+                return false;
+            }
+        } catch (BadSqlGrammarException e) {
             removeFromDatabase(dbTemplate);
             return false;
         }
+
 
         return true;
     }
