@@ -7,8 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public final class StatsResultsMapper implements RowMapper<MessageStatsResult> {
-    public StatsResultsMapper() {
-    }
     @Override
     public MessageStatsResult mapRow(ResultSet rs, int rowNum) throws SQLException {
         MessageStatsResult result = new MessageStatsResult(rs.getString("CMACMessageNumber"));

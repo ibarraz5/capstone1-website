@@ -30,7 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestMapping("/wea")
+@RequestMapping("/wea/api/")
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class WEAController {
@@ -132,7 +132,7 @@ public class WEAController {
      *
      * @return HTTP 200 OK and an XML formatted WEA message
      */
-    @GetMapping(value = "/getMessage", produces = "application/xml")
+    @GetMapping(value = "getMessage", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> getMessage() {
         //first check for oldest non-expired messages in database
         String query = "SELECT CMACMessageNumber, CMACCapIdentifier " +
@@ -245,7 +245,7 @@ public class WEAController {
      * @return HTTP 201 CREATED and the URI of the
      *         uploaded data
      */
-    @PutMapping(value = "/upload")
+    @PutMapping(value = "upload")
     public ResponseEntity<String> upload(@RequestBody CollectedDeviceData userData) {
         String query = "INSERT INTO alert_db.device_upload_data VALUES('" + userData.getMessageNumber() + "', NULL, NULL, NULL, " +
                 "NULL, '" + userData.getLocationReceived() + "', '" + userData.getLocationDisplayed() + "', '" +
@@ -277,7 +277,7 @@ public class WEAController {
      *         in XML format, or HTTP 404 NOT
      *         FOUND if the identifier is invalid
      */
-    @GetMapping(value = "/getUpload", produces = "application/xml")
+    @GetMapping(value = "getUpload", produces = "application/xml")
     public ResponseEntity<CollectedDeviceData> getUpload(@RequestParam int identifier) {
         String query = "SELECT * " +
                 "FROM alert_db.device_upload_data " +
@@ -300,7 +300,7 @@ public class WEAController {
      * @return HTTP 200 OK and a JASON array of
      *         objects containing each message's stats
      */
-    @GetMapping("/{sender}/messages/{page}/filter")
+    @GetMapping("{sender}/messages/{page}/filter")
     public ResponseEntity<ObjectNode> getMessageList(@PathVariable String sender, @PathVariable int page,
                                                      @RequestParam(required = false) String messageNumber,
                                                      @RequestParam(required = false) String messageType,
@@ -308,12 +308,6 @@ public class WEAController {
                                                      @RequestParam(required = false) String toDate,
                                                      @RequestParam(required = false) String sortBy,
                                                      @RequestParam(required = false) String sortOrder) {
-        //common name query
-        String nameQuery = "SELECT CMACSenderName " +
-                "FROM alert_db.cmac_message " +
-                "WHERE CMACSender = '" + sender + "' " +
-                "GROUP BY CMACSenderName;";
-
         //set base query
         String baseQuery = "SELECT cmac_message.CMACMessageNumber, CMACDateTime, CMACMessageType, " +
                 "COUNT(*) AS DeviceCount, " +
@@ -347,7 +341,7 @@ public class WEAController {
             filters.append("&& CMACDateTime < DATE_ADD('" + toDate + "', INTERVAL 1 DAY) ");
         }
 
-        String grouping = "GROUP BY cmac_message.CMACMessageNumber ";
+        String grouping = "GROUP BY cmac_message.CMACMessageNumber, CMACDateTime, CMACMessageType ";
 
         //set sorting and ordering
         if (isNullOrEmpty(sortBy) || (!sortBy.equalsIgnoreCase("number")
@@ -386,7 +380,19 @@ public class WEAController {
         String commonName;
         try {
             resultList = dbTemplate.query(query.toString(), new StatsResultsMapper());
-            commonName = dbTemplate.queryForObject(nameQuery, String.class);
+
+            //NWS can have multiple common names but the query expects a singe result
+            if (sender.equals("w-nws.webmaster@noaa.gov")) {
+                commonName = "National Weather Service";
+            } else {
+                //common name query
+                String nameQuery = "SELECT CMACSenderName " +
+                        "FROM alert_db.cmac_message " +
+                        "WHERE CMACSender = '" + sender + "' " +
+                        "GROUP BY CMACSenderName;";
+
+                commonName = dbTemplate.queryForObject(nameQuery, String.class);
+            }
         } catch (BadSqlGrammarException e) {
             e.printStackTrace();
             throw new InternalError("Bad SQL Grammar");
@@ -399,7 +405,6 @@ public class WEAController {
         root.set("prev", BooleanNode.valueOf(page > 1));
         root.set("next", BooleanNode.valueOf(resultList.size() > 9));
 
-
         return ResponseEntity.ok(root);
     }
 
@@ -410,7 +415,7 @@ public class WEAController {
      *
      * @return HTTP 200 OK and an XML CAP message
      */
-    @GetMapping(value = "/parseCapMessage", produces = "application/xml")
+    @GetMapping(value = "parseCapMessage", produces = "application/xml")
     public ResponseEntity<CAPMessageModel> parseCapMessage() {
         CAPMessageModel result = XMLParser.parseSampleCap("src/main/resources/sampleCapMessage.xml");
 
@@ -426,7 +431,7 @@ public class WEAController {
      *         message was successfully added to the database,
      *         otherwise HTTP 400 BAD REQUEST
      */
-    @GetMapping(value = "/capToCmac", produces = "application/xml")
+    @GetMapping(value = "capToCmac", produces = "application/xml")
     public ResponseEntity<CMACMessageModel> capToCmac() {
         CAPMessageModel result = XMLParser.parseSampleCap("src/main/resources/sampleCapMessage.xml");
 
@@ -451,7 +456,7 @@ public class WEAController {
      *         message was successfully added to the database,
      *         otherwise HTTP 400 BAD REQUEST
      */
-    @GetMapping(value = "/getIpawsAlerts")
+    @GetMapping(value = "getIpawsAlerts")
     public ResponseEntity<Boolean> getIpawsAlerts() {
         Boolean result;
         try {
