@@ -80,6 +80,26 @@ const AppProvider = ({ children }) => {
     }
   };
 
+  const getCoords = (coordList) => {
+    let coordPairs = coordList.split(" ");
+
+    let x = [];
+    let y = [];
+
+    coordPairs.array.forEach((element) => {
+      let splitCoords = coordPairs.split(",");
+      x.push(splitCoords[0]);
+      y.push(splitCoords[1]);
+    });
+
+    let finalCoords = {
+      x: x,
+      y: y,
+    };
+
+    return finalCoords;
+  };
+
   const buildFilters = ({ mType, mNum, frDate, toDate, sortBy, sortOrder }) => {
     let filterString = `?${mType !== "" ? "messageType=" : ""}${mType}${
       mType !== "" ? "&" : ""
@@ -170,6 +190,7 @@ const AppProvider = ({ children }) => {
         decreasePage,
         fullData,
         buildFilters,
+        getCoords,
       }}
     >
       {children}
