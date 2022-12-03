@@ -16,7 +16,7 @@ const monthHolder = [
   "November",
   "December",
 ];
-const baseUrl = "http://localhost:8080/wea/";
+const baseUrl = "http://localhost:8080/wea/api/";
 
 const AppContext = React.createContext();
 

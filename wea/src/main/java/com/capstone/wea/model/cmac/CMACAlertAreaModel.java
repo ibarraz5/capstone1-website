@@ -8,12 +8,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Area")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class CMACMessageAlertArea {
+public class CMACAlertAreaModel {
     @JsonProperty("CMAC_area_description")
     private String areaDescription;
 
@@ -28,7 +29,7 @@ public class CMACMessageAlertArea {
     private List<String> geocodeList;
     @JsonProperty("CMAC_cap_geocode")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageCapGeocode> capGeocodeList;
+    private List<CMACCapGeocodeModel> capGeocodeList;
 
     public void setAreaDescription(String areaDescription) {
         this.areaDescription = areaDescription;
@@ -46,7 +47,7 @@ public class CMACMessageAlertArea {
         this.geocodeList = geocodeList;
     }
 
-    public void setCapGeocodeList(List<CMACMessageCapGeocode> capGeocodeList) {
+    public void setCapGeocodeList(List<CMACCapGeocodeModel> capGeocodeList) {
         this.capGeocodeList = capGeocodeList;
     }
 
@@ -66,19 +67,58 @@ public class CMACMessageAlertArea {
         return geocodeList;
     }
 
-    public boolean addToDatabse(JdbcTemplate dbTemplate, String messageNumber) {
+    public void addArea(String areaDescription, String geocode) {
+        if (this.areaDescription != null) {
+            this.areaDescription += "; " + areaDescription;
+        } else {
+            this.areaDescription = areaDescription;
+        }
+
+        if (capGeocodeList == null) {
+            capGeocodeList = new ArrayList<>();
+        }
+
+        capGeocodeList.add(new CMACCapGeocodeModel("SAME", geocode));
+
+        if (geocodeList == null) {
+            geocodeList = new ArrayList<>();
+        }
+
+        geocodeList.add(geocode);
+    }
+
+    public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
         String[] areaNames = areaDescription.split("; ");
 
+        int sameCount = 0;
+        int ugcCount = 0;
+        int startIndex = 0;
+
+        //count SAME vs UGC
+        for (CMACCapGeocodeModel geocode : capGeocodeList) {
+            if (geocode.getName().equalsIgnoreCase("same")) {
+                sameCount++;
+            } else {
+                ugcCount++;
+            }
+        }
+
         //the number of names must equal the number of geocodes
-        if (areaNames.length != geocodeList.size()) {
+        if (sameCount == areaNames.length) {
+            startIndex = 0;
+        } else if (ugcCount == areaNames.length) {
+            startIndex = sameCount;
+        } else {
             return false;
         }
+
 
         String query;
 
         for (int i = 0; i < areaNames.length; i++) {
             query = "INSERT INTO alert_db.cmac_area_description " +
-                    "VALUES ('" + messageNumber + "', '" + areaNames[i] + "', '" + geocodeList.get(i) + "');";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', '" + areaNames[i] + "', '" +
+                    geocodeList.get(i + startIndex) + "');";
 
             //failed to insert, remove all prior successful inserts
             if (dbTemplate.update(query) == 0) {
@@ -98,12 +138,13 @@ public class CMACMessageAlertArea {
             BigDecimal[] decCoordinates = new BigDecimal[2];
             String[] coordinates = polyCoordinates[i].split(",");
 
-            //index 1 = lat, index 2 = lon
+            //index 0 = lat, index 1 = lon
             decCoordinates[0] = new BigDecimal(coordinates[0]);
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
             query = "INSERT INTO alert_db.cmac_polygon_coordinates " +
-                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', " + decCoordinates[0] + ", " +
+                    decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 return false;
@@ -127,7 +168,8 @@ public class CMACMessageAlertArea {
             decCoordinates[1] = new BigDecimal(coordinates[1]);
 
             query = "INSERT INTO alert_db.cmac_circle_coordinates " +
-                    "VALUES ('" + messageNumber + "', " + decCoordinates[0] + ", " + decCoordinates[1] + ");";
+                    "VALUES (" + messageNumber + ", '" + capIdentifier + "', " + decCoordinates[0] + ", " +
+                    decCoordinates[1] + ");";
 
             if (dbTemplate.update(query) == 0) {
                 return false;

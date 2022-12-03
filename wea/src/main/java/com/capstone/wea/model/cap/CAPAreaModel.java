@@ -1,7 +1,7 @@
 package com.capstone.wea.model.cap;
 
-import com.capstone.wea.model.cmac.CMACMessageAlertArea;
-import com.capstone.wea.model.cmac.CMACMessageCapGeocode;
+import com.capstone.wea.model.cmac.CMACAlertAreaModel;
+import com.capstone.wea.model.cmac.CMACCapGeocodeModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
@@ -21,14 +21,14 @@ public class CAPAreaModel {
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<CAPGeocodeModel> geocode;
 
-    public CMACMessageAlertArea toCmac() {
-        CMACMessageAlertArea cmac = new CMACMessageAlertArea();
+    public CMACAlertAreaModel toCmac() {
+        CMACAlertAreaModel cmac = new CMACAlertAreaModel();
 
-        cmac.setAreaDescription(areaDesc.replace(",", ";"));
+        cmac.setAreaDescription(areaDesc);
         cmac.setPolygon(polygon);
         cmac.setCircle("");
 
-        List<CMACMessageCapGeocode> cmacGeocode = new ArrayList<>();
+        List<CMACCapGeocodeModel> cmacGeocode = new ArrayList<>();
 
         for (CAPGeocodeModel cap : geocode) {
             cmacGeocode.add(cap.toCmac());

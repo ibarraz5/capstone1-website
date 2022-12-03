@@ -16,16 +16,14 @@ public class CollectedDeviceData {
     private String locationDisplayed;
     @JsonProperty("CMAC_message_number")
     private String messageNumber;
-
+    @JsonProperty("CMAC_cap_identifier")
+    private String capIdentifier;
     @JsonProperty("Received_Outside_Area")
     private boolean receivedOutsideArea;
-
     @JsonProperty("Displayed_Outside_Area")
     private boolean displayedOutsideArea;
-
     @JsonProperty("Received_After_Expired")
     private boolean receivedAfterExpired;
-
     @JsonProperty("Displayed_After_Expired")
     private boolean displayedAfterExpired;
     @JsonProperty("id")
@@ -57,6 +55,10 @@ public class CollectedDeviceData {
 
     public String getMessageNumber() {
         return messageNumber;
+    }
+
+    public String getCapIdentifier() {
+        return capIdentifier;
     }
 
     public boolean isReceivedOutsideArea() {
@@ -121,6 +123,14 @@ public class CollectedDeviceData {
      */
     public void setMessageNumber(String messageNumber) {
         this.messageNumber = messageNumber;
+    }
+
+    /**
+     * Sets the CMAC_cap_identifier for which these stats are for
+     * @param capIdentifier
+     */
+    public void setCapIdentifier(String capIdentifier) {
+        this.capIdentifier = capIdentifier;
     }
 
     /**

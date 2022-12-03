@@ -1,10 +1,14 @@
 package com.capstone.wea.model.cmac;
 
+import com.capstone.wea.model.sqlresult.mappers.CMACAlertAreaMapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_Alert_Attributes")
@@ -40,7 +44,7 @@ public class CMACMessageModel {
     private String capSentDateTime;
 
     @JsonProperty("CMAC_alert_info")
-    private CMACMessageAlertInfo alertInfo;
+    private CMACAlertInfoModel alertInfo;
 
     public void setXmlns(String xmlns) {
         this.xmlns = xmlns;
@@ -64,6 +68,7 @@ public class CMACMessageModel {
 
     public void setSentDateTime(String sentDateTime) {
         this.sentDateTime = sentDateTime;
+        capSentDateTime = sentDateTime;
     }
 
     public void setStatus(String status) {
@@ -74,20 +79,24 @@ public class CMACMessageModel {
         this.messageType = messageType;
     }
 
-    public void setAlertUri(String alertUri) {
-        this.alertUri = alertUri;
+    public void setAlertUri() {
+        alertUri = "http://localhost:8080/wea/getMessage" + messageNumber;
     }
 
     public void setCapIdentifier(String capIdentifier) {
         this.capIdentifier = capIdentifier;
     }
 
-    public void setCapSentDateTime(String capSentDateTime) {
-        this.capSentDateTime = capSentDateTime;
+    public void setAlertInfo(CMACAlertInfoModel alertInfo) {
+        this.alertInfo = alertInfo;
     }
 
-    public void setAlertInfo(CMACMessageAlertInfo alertInfo) {
-        this.alertInfo = alertInfo;
+    public void addAlertAreaList(List<CMACAlertAreaModel> alertAreaList) {
+        alertInfo.setAlertAreaList(alertAreaList);
+    }
+
+    public void addAlertTextList(List<CMACAlertTextModel> alertTextList) {
+        alertInfo.setAlertTextList(alertTextList);
     }
 
     /**
@@ -99,45 +108,69 @@ public class CMACMessageModel {
      * was not
      */
     public boolean addToDatabase(JdbcTemplate dbTemplate) {
+        String referenceNumber = alertInfo.getReferenceNumber() == null ?
+                "NULL" : "'" + alertInfo.getReferenceNumber() + "'";
         String query = "INSERT INTO alert_db.cmac_message " +
-                "VALUES ('" + messageNumber + "', '" + capIdentifier + "', '" + sender + "', '" +
-                sentDateTime.replace("Z", "") + "', " + "'" + messageType + "', '" +
-                alertInfo.getSenderName() + "', '" + alertInfo.getExpires().replace("Z", "") + "');";
+                "VALUES (NULL, '" + capIdentifier + "', '" + sender + "', '" +
+                sentDateTime.replace("Z", "") + "', '" + status + "', '" + messageType + "', '" +
+                alertInfo.getSenderName() + "', '" + alertInfo.getExpires().replace("Z", "") + "', '" +
+                alertInfo.getCategory() + "', '" + alertInfo.getSeverity() + "', '" + alertInfo.getUrgency() + "', '" +
+                alertInfo.getCertainty() + "', " + referenceNumber + ");";
 
         System.out.println(query);
 
-        //failed to insert
-        if (dbTemplate.update(query) == 0) {
-            return false;
-        }
+        //TODO: cap identifier should be the sole primary key so that attempts to insert a duplicate from IPAWS will
+        // fail. Also only add messages of type Test, Alert, and Update
+        try {
+            int messageNumberInt;
+            //failed to insert
+            if (dbTemplate.update(query) == 0) {
+                return false;
+            } else {
+                messageNumberInt = dbTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+            }
 
-        //If another part of this message fails to insert, delete all entries for this message in all tables
-        if (!alertInfo.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
+            messageNumber = String.format("%08X", messageNumberInt);
+
+            //If another part of this message fails to insert, delete all entries for this message in all tables
+            if (!alertInfo.addToDatabase(dbTemplate, messageNumberInt, capIdentifier)) {
+                removeFromDatabase(dbTemplate);
+                return false;
+            }
+        } catch (BadSqlGrammarException e) {
             removeFromDatabase(dbTemplate);
             return false;
         }
+
 
         return true;
     }
 
     private void removeFromDatabase(JdbcTemplate dbTemplate) {
+        int msgNum = Integer.parseInt(messageNumber, 16);
+
         String query = "DELETE FROM alert_db.cmac_circle_coordinates " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_polygon_coordinates " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_area_description " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
+
+        dbTemplate.update(query);
+
+        query = "DELETE FROM alert_db.cmac_alert_text " +
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
 
         query = "DELETE FROM alert_db.cmac_message " +
-                "WHERE CMACMessageNumber = '" + messageNumber + "';";
+                "WHERE CMACMessageNumber = " + msgNum + ";";
 
         dbTemplate.update(query);
     }

@@ -2,39 +2,58 @@ CREATE SCHEMA alert_db;
 USE alert_db;
 
 CREATE TABLE cmac_message (
-    CMACMessageNumber VARCHAR(16) NOT NULL,
+    CMACMessageNumber INT NOT NULL AUTO_INCREMENT,
     CMACCapIdentifier VARCHAR(180) NOT NULL,
     CMACSender VARCHAR(180) NOT NULL,
     CMACDateTime DATETIME NOT NULL,
-    CMACMessageType VARCHAR(165) NOT NULL,
+    CMACStatus VARCHAR(20) NOT NULL,
+    CMACMessageType VARCHAR(20) NOT NULL,
     CMACSenderName VARCHAR(180) NOT NULL,
     CMACExpiresDateTime DATETIME NOT NULL,
-    CONSTRAINT PK_CMACMessage PRIMARY KEY (CMACMessageNumber)
+    CMACCategory VARCHAR(20) NOT NULL,
+    CMACSeverity VARCHAR(20) NOT NULL,
+    CMACUrgency VARCHAR(20) NOT NULL,
+    CMACCertainty VARCHAR(20) NOT NULL,
+    CMACReferencedCapIdentifier VARCHAR(180),
+    CONSTRAINT PK_CMACMessage PRIMARY KEY (CMACMessageNumber, CMACCapIdentifier)
 );
 
 CREATE TABLE cmac_polygon_coordinates (
-    CMACMessageNumber VARCHAR(16) NOT NULL,
+    CMACMessageNumber INT NOT NULL,
+    CMACCapIdentifier VARCHAR(180) NOT NULL,
     Latitude DECIMAL(5,2) NOT NULL,
     Longitude DECIMAL(5,2) NOT NULL,
-    FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
+    FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
 
 CREATE TABLE cmac_circle_coordinates (
-    CMACMessageNumber VARCHAR(16) NOT NULL,
+    CMACMessageNumber INT NOT NULL,
+    CMACCapIdentifier VARCHAR(180) NOT NULL,
     Latitude DECIMAL(5,2) NOT NULL,
     Longitude DECIMAL(5,2) NOT NULL,
-    FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
+    FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
 
 CREATE TABLE cmac_area_description (
-    CMACMessageNumber VARCHAR(16) NOT NULL,
-    AreaName VARCHAR(30) NOT NULL,
-    CMASGeocode INT NOT NULL,
-    FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
+    CMACMessageNumber INT NOT NULL,
+    CMACCapIdentifier VARCHAR(150) NOT NULL,
+    AreaName VARCHAR(500) NOT NULL,
+    CMASGeocode VARCHAR(20) NOT NULL,
+    FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
+);
+
+CREATE TABLE cmac_alert_text (
+	CMACMessageNumber INT NOT NULL,
+    CMACCapIdentifier VARCHAR(150) NOT NULL,
+    CMACLanguage VARCHAR(20) NOT NULL,
+    CMACShortMessage VARCHAR(200) NOT NULL,
+    CMACLongMessage VARCHAR(2000),
+	FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
 
 CREATE TABLE device_upload_data (
-    CMACMessageNumber VARCHAR(16) NOT NULL,
+    CMACMessageNumber INT NOT NULL,
+    CMACCapIdentifier VARCHAR(180) NOT NULL,
     UploadID INT NOT NULL AUTO_INCREMENT,
     DeviceOS VARCHAR(180) DEFAULT NULL,
     DeviceOSVersion VARCHAR(180) DEFAULT NULL,
@@ -48,5 +67,5 @@ CREATE TABLE device_upload_data (
     ReceivedAfterExpired BIT DEFAULT 0,
     DisplayedAfterExpired BIT DEFAULT 0,
     CONSTRAINT PK_UploadID PRIMARY KEY (UploadID),
-    FOREIGN KEY (CMACMessageNumber) REFERENCES cmac_message(CMACMessageNumber)
+    FOREIGN KEY (CMACMessageNumber, CMACCapIdentifier) REFERENCES cmac_message(CMACMessageNumber, CMACCapIdentifier)
 );
