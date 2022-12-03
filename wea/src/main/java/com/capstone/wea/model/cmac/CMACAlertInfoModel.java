@@ -6,11 +6,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "CMAC_alert_info")
-public class CMACMessageAlertInfo {
+public class CMACAlertInfoModel {
     @JsonProperty("CMAC_category")
     private String category;
     @JsonProperty("CMAC_severity")
@@ -25,13 +26,16 @@ public class CMACMessageAlertInfo {
     @JsonProperty("CMAC_sender_name")
     private String senderName;
 
+    @JsonProperty("CMAC_referenced_message_number")
+    private String referenceNumber;
+
     @JsonProperty("CMAC_Alert_Area")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageAlertArea> alertAreaList;
+    private List<CMACAlertAreaModel> alertAreaList;
 
     @JsonProperty("CMAC_Alert_Text")
     @JacksonXmlElementWrapper(useWrapping = false)
-    private List<CMACMessageAlertText> alertTextList;
+    private List<CMACAlertTextModel> alertTextList;
 
     public String getExpires() {
         return expires;
@@ -41,8 +45,32 @@ public class CMACMessageAlertInfo {
         return senderName;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public String getUrgency() {
+        return urgency;
+    }
+
+    public String getCertainty() {
+        return certainty;
+    }
+
+    public String getReferenceNumber() {
+        return referenceNumber;
+    }
+
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
     }
 
     public void setSeverity(String severity) {
@@ -65,18 +93,23 @@ public class CMACMessageAlertInfo {
         this.senderName = senderName;
     }
 
-    public void setAlertAreaList(List<CMACMessageAlertArea> alertAreaList) {
+    public void setAlertAreaList(List<CMACAlertAreaModel> alertAreaList) {
         this.alertAreaList = alertAreaList;
     }
 
-    public void setAlertTextList(List<CMACMessageAlertText> alertTextList) {
+    public void setAlertTextList(List<CMACAlertTextModel> alertTextList) {
         this.alertTextList = alertTextList;
     }
 
-    public boolean addToDatabase(JdbcTemplate dbTemplate, String messageNumber, String capIdentifier) {
-        //failed to insert an area list, must delete this entry and all added alert areas
-        for (int i = 0; i < alertAreaList.size(); i++) {
-            if (!alertAreaList.get(i).addToDatabse(dbTemplate, messageNumber)) {
+    public boolean addToDatabase(JdbcTemplate dbTemplate, int messageNumber, String capIdentifier) {
+        for (CMACAlertAreaModel alertArea : alertAreaList) {
+            if (!alertArea.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
+                return false;
+            }
+        }
+
+        for (CMACAlertTextModel alertText : alertTextList) {
+            if (!alertText.addToDatabase(dbTemplate, messageNumber, capIdentifier)) {
                 return false;
             }
         }

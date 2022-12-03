@@ -1,14 +1,13 @@
 package com.capstone.wea.model.cap;
 
-import com.capstone.wea.model.cmac.CMACMessageAlertArea;
-import com.capstone.wea.model.cmac.CMACMessageAlertInfo;
-import com.capstone.wea.model.cmac.CMACMessageAlertText;
+import com.capstone.wea.model.cmac.CMACAlertAreaModel;
+import com.capstone.wea.model.cmac.CMACAlertInfoModel;
+import com.capstone.wea.model.cmac.CMACAlertTextModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,8 +45,8 @@ public class CAPInfoModel {
     @JacksonXmlElementWrapper(useWrapping = false)
     private List<CAPAreaModel> area;
 
-    public CMACMessageAlertInfo toCmac() {
-        CMACMessageAlertInfo cmac = new CMACMessageAlertInfo();
+    public CMACAlertInfoModel toCmac() {
+        CMACAlertInfoModel cmac = new CMACAlertInfoModel();
 
         cmac.setCategory(category);
         cmac.setSeverity(severity);
@@ -55,34 +54,23 @@ public class CAPInfoModel {
         cmac.setCertainty(certainty);
         cmac.setExpires(expires);
         cmac.setSenderName(senderName);
-        List <CMACMessageAlertArea> cmacArea = new ArrayList<>();
+        List <CMACAlertAreaModel> cmacArea = new ArrayList<>();
 
         for (CAPAreaModel areaModel : area) {
             cmacArea.add(areaModel.toCmac());
         }
         cmac.setAlertAreaList(cmacArea);
 
-        /*
-         * TODO: this is the main reason I need IPAWS access
-         * The current CAP model I have to work with does not
-         * support the following:
-         *
-         * multiple alert texts
-         * non-english alerts
-         * long vs short descriptions (unless headline == short?? this is unclear)
-         *
-         * Without real messages/and up-to-date schema, CAP
-         * to CMAC conversion cannot truly be compleated
-         * (mush to the dismay of the Phyrexians)
-         */
-        List<CMACMessageAlertText> cmacText = new ArrayList<>();
+        List<CMACAlertTextModel> cmacText = new ArrayList<>();
 
-        cmacText.add(new CMACMessageAlertText());
+        cmacText.add(new CMACAlertTextModel());
         cmacText.get(0).setLanguage("English");
-        cmacText.get(0).setShortLength(headline.length());
-        cmacText.get(0).setShortMessage(headline);
-        cmacText.get(0).setLongLength(description.length());
-        cmacText.get(0).setLongMessage(description);
+        cmacText.get(0).setShortMessage(headline.replace("\n", " "));
+        cmacText.get(0).setShortLength(cmacText.get(0).getShortMessage().length());
+        cmacText.get(0).setLongMessage(description.replace("\n", " "));
+        cmacText.get(0).setLongLength(cmacText.get(0).getLongMessage().length());
+
+        cmac.setAlertTextList(cmacText);
 
         return cmac;
     }

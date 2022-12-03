@@ -24,9 +24,10 @@ command in linux, or `gradle bootRun` in Windows.
 
 ## Making API Requests
 
-The host for WEA API endpoints is always `http://localhost:8080/wea`. In this projects root directory, there is a 
-json file named `API_Tests.har`. This is an `HAR - HTTP Archive Format` file that can imported in either Insomnia or
-Postman to test the API endpoints.
+The host for WEA API endpoints is always `http://<your_ip>:8080/wea/api` where `<your_ip>` is the local IP address 
+of the machine running this program, or `localhost` if you are hitting the api from the same machine as the one 
+running the program. In this projects root directory, there is a json file named `API_Tests. har`. This is an `HAR - 
+HTTP Archive Format` file that can imported in either Insomnia or Postman to test the API endpoints.
 
 At this time, the WEA API *does not* support HTTPS.
 
@@ -369,7 +370,7 @@ ascending order
                 "displayedAfterExpiredCount": 0
             }
         ],
-        "commonName": "NWS San Angelo TX",
+        "commonName": "National Weather Service",
         "prev": false,
         "next": false
     }
