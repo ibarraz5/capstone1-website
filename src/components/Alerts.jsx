@@ -1,7 +1,7 @@
 import { useGlobalContext } from "../context";
 
 const Alerts = () => {
-  const { selectAlert, dbAlertList, page } = useGlobalContext();
+  const { selectAlert, dbAlertList, page, getCoords } = useGlobalContext();
 
   if (dbAlertList.length < 1 && page !== 1) {
     return (
@@ -23,7 +23,7 @@ const Alerts = () => {
     <section className="section-center">
       {dbAlertList.map((alert) => {
         const { messageNumber, date, messageType } = alert;
-
+        // const { x, y } = getCoords(coordinates);
         return (
           <article key={messageNumber} className="single-alert">
             <header>
